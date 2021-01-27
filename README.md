@@ -1,9 +1,3 @@
-# Example Server for ECE 413/513 - Fall 2020
+# AWS-Server
 
-To install and run this server and the included examples on your local machine or server, run the following commands
-
-```
-git clone https://github.com/rlysecky/eceServer20.git
-cd eceServer20
-npm start
-```
+Using a heart rate sensor, a AWS EC2 instance server and a Particle Argon, a user can create an account and register a device to show sensor readings. 
