@@ -1,6 +1,11 @@
+// Replaces the website visited in browser so that when the back button is cliked, client is sent to the right website
+if (window.localStorage.getItem("authToken")) {
+  window.location.replace("account.html");
+}
+
 // Ajax POST function that will execute when client side form is submitted
 function sendSigninRequest() {
-  console.log("inside sendsigninREquest");
+  console.log("inside sendsigninRequest");
   $.ajax({
     url: '/users/signin',
     method: 'POST',
@@ -21,7 +26,7 @@ function signinSuccess(data, testStatus, jqXHR) {
 }
 
 function signinFailure(jqXHR, testStatus, errorThrown) {
-  
+
   // Case where there was an authentication failure
   if (jqXHR.status == 401) {
      $('#ServerResponse').html("<div class='error'>Error: " + jqXHR.responseJSON.message +"</div>");
@@ -38,7 +43,7 @@ function signinFailure(jqXHR, testStatus, errorThrown) {
 $(function() {
 
   // Replaces the website visited in browser so that when the back button is cliked, client is sent to the right website
-  if( window.localStorage.getItem("authToken") ) {
+  if (window.localStorage.getItem("authToken")) {
     window.location.replace("account.html");
   }
 
@@ -54,7 +59,7 @@ $(function() {
 
   // When 'enter' key is pressed in email field
   $("#email").keypress(function(event) {
-    if (event.which === 13) {      
+    if (event.which === 13) {
       sendSigninRequest();
     }
   });

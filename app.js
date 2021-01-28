@@ -7,12 +7,12 @@ const path = require('path');
 
 let app = express();
 
-// Routes for Holz app
+// Routes for HeartTrack app
 let usersRouter = require('./routes/users');
 let devicesRouter = require('./routes/devices');
 // let potholesRouter = require('./routes/potholes');
 
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -41,7 +41,7 @@ app.use(cookieParser());
 // Static file hosting
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Endpoints for Holz App
+// Endpoints for HeartTrack App
 app.use('/users', usersRouter);
 app.use('/devices', devicesRouter);
 // app.use('/potholes', potholesRouter);
