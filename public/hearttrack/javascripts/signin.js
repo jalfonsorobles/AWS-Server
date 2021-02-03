@@ -42,11 +42,6 @@ function signinFailure(jqXHR, testStatus, errorThrown) {
 
 $(function() {
 
-  // Replaces the website visited in browser so that when the back button is cliked, client is sent to the right website
-  if (window.localStorage.getItem("authToken")) {
-    window.location.replace("account.html");
-  }
-
   // When 'signin' button is clicked
   $("#signin").click(sendSigninRequest);
 

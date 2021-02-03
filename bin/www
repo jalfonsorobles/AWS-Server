@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('eceserver20:server');
+var debug = require('debug')('hearttrack:server');
 var http = require('http');
 
 /**

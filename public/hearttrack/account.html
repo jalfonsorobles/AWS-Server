@@ -13,7 +13,7 @@
   <!-- Import jQuery -->
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  
+
   <link href="./stylesheets/account.css" rel="stylesheet">
   <script src="./javascripts/account.js"></script>
   <script src="./javascripts/signout.js"></script>
@@ -57,10 +57,19 @@
 				<li class="collection-item" id="addDeviceForm">
 					<label for="deviceId">New Device ID:</label>
 					<input type="text" id="deviceId" name="deviceId" col="30">
-					<button id="registerDevice" class="waves-effect waves-light btn">Register</button> 
-					<button id="cancel" class="waves-effect waves-light btn">Cancel</button> 
+					<button id="registerDevice" class="waves-effect waves-light btn">Register</button>
+					<button id="cancel" class="waves-effect waves-light btn">Cancel</button>
 				</li>
 				<li class="collection-item" id="addDeviceControl"><a href="#!" id="addDevice">Add Device</a></li>
+			</ul>
+
+      <ul class="collection with-header" id="data">
+				<li class="collection-header">
+					<h5>Data</h5>
+				</li>
+				<li class="collection-item" id="addDataForm">
+					<div class="data"></div>
+				</li>
 			</ul>
 			<div class='red-text text-darken-2' id="error"></div>
 		</div>

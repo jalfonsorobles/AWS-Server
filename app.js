@@ -10,7 +10,7 @@ let app = express();
 // Routes for HeartTrack app
 let usersRouter = require('./routes/users');
 let devicesRouter = require('./routes/devices');
-// let potholesRouter = require('./routes/potholes');
+let readingsRouter = require('./routes/readings');
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -44,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Endpoints for HeartTrack App
 app.use('/users', usersRouter);
 app.use('/devices', devicesRouter);
-// app.use('/potholes', potholesRouter);
+app.use('/readings', readingsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

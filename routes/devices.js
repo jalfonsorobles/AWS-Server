@@ -2,9 +2,12 @@ const express = require('express');
 let router = express.Router();
 let jwt = require("jwt-simple");
 let fs = require('fs');
+let superagent = require('superagent');
 let Device = require("../models/device");
 
+
 let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
+// let particleAccessToken = fs.readFileSync(__dirname + '/../../particleAccessToken').toString();
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -101,41 +104,120 @@ router.post('/register', function(req, res, next) {
   });
 });
 
+// POST request to api.particle.io to ping device
 router.post('/ping', function(req, res, next) {
 
-    let responseJson = {
-        success: false,
-        message : "",
-    };
-    let deviceExists = false;
+  let responseJson = {
+      success: false,
+      message : "",
+  };
 
-    // Ensure the request includes the deviceId parameter
-    if( !req.body.hasOwnProperty("deviceId")) {
-        responseJson.message = "Missing deviceId.";
-        return res.status(400).json(responseJson);
-    }
+  // Ensure the request includes the deviceId parameter
+  if(!req.body.hasOwnProperty("deviceId")) {
+      responseJson.message = "Missing device ID.";
+      return res.status(400).json(responseJson);
+  }
 
-    // If authToken provided, use email in authToken
-    try {
-        let decodedToken = jwt.decode(req.headers["x-auth"], secret);
-    }
-    catch (ex) {
-        responseJson.message = "Invalid authorization token.";
-        return res.status(400).json(responseJson);
-    }
+  // Use authToken for verification
+  try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
 
-    request({
-       method: "POST",
-       uri: "https://api.particle.io/v1/devices/" + req.body.deviceId + "/pingDevice",
-       form: {
-	       access_token : particleAccessToken,
-	       args: "" + (Math.floor(Math.random() * 11) + 1)
+  catch (ex) {
+      responseJson.message = "Invalid authorization token.";
+      return res.status(400).json(responseJson);
+  }
+
+  let particleAccessToken = "41610c92397132bb373787061404b0e972d1cd2a";
+
+  // request({
+  //    method: "POST",
+  //    uri: "https://api.particle.io/v1/devices/" + req.body.deviceId + "/ping",
+  //    form: {
+  //      access_token : particleAccessToken
+  //     }
+  // });
+
+  // Sending request using particleAccessToken
+  superagent
+    .put("https://api.particle.io/v1/devices/" + req.body.deviceId + "/ping")
+    .type('application/x-www-form-urlencoded')
+    .send({ access_token : particleAccessToken })
+    .end((err, response) => {
+
+      if(response.body.online == true && response.body.ok == true) {
+        let today = new Date();
+        let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        responseJson.success = true;
+        responseJson.message = "Device pinged successfully at " + time;
+        console.log("Everything good");
+        return res.status(200).json(responseJson);
+      }
+
+      else {
+        console.log("Everything not good");
+        responseJson.success = false;
+
+        if(!response.body.hasOwnProperty("error_description")) {
+          responseJson.message = "Device not online";
         }
-    });
 
-    responseJson.success = true;
-    responseJson.message = "Device ID " + req.body.deviceId + " pinged.";
-    return res.status(200).json(responseJson);
+        else {
+          responseJson.message = "Device not pinged. Error: " + response.body.error_description;
+          return res.status(200).json(responseJson);
+        }
+      }
+    });
+});
+
+// Signals the device for 10 seconds approximately
+router.post('/signal', function(req, res, next) {
+
+  let responseJson = {
+      success: false,
+      message : "",
+  };
+
+  // Ensure the request includes the deviceId parameter
+  if(!req.body.hasOwnProperty("deviceId")) {
+      responseJson.message = "Missing device ID.";
+      return res.status(400).json(responseJson);
+  }
+
+  // Use authToken for verification
+  try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+
+  catch (ex) {
+      responseJson.message = "Invalid authorization token.";
+      return res.status(400).json(responseJson);
+  }
+
+  let particleAccessToken = "41610c92397132bb373787061404b0e972d1cd2a";
+
+  // Start the signaling
+  superagent
+    .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
+    .type('application/x-www-form-urlencoded')
+    .send({ signal: 1, access_token : particleAccessToken })
+    .end((err, response) => {
+
+      setTimeout(timer, 10000);
+
+      // Stop the signaling
+      function timer() {
+        superagent
+        .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
+        .type('application/x-www-form-urlencoded')
+        .send({ signal: 0, access_token : particleAccessToken })
+        .end((err, response) => {});
+      }
+
+      responseJson.success = true;
+      responseJson.message = "Device now signaling";
+      return res.status(200).json(responseJson);
+    });
 });
 
 module.exports = router;
