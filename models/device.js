@@ -1,7 +1,7 @@
 let db = require("../db");
 
 let deviceSchema = new db.Schema({
-    apikey:       String,
+    apiKey:       String,
     deviceId:     String,
     userEmail:    String,
     lastContact:  { type: Date, default: Date.now }

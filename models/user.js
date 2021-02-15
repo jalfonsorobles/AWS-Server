@@ -7,10 +7,10 @@ let userSchema = new db.Schema({
   dateRegistered:   { type: Date, default: Date.now },
   lastAccess:       { type: Date, default: Date.now },
   userDevices:      [ String ],
-  averageHeartRate: [ { average: Number, readings: Number } ]
+  averageHeartRate: [ Number ],
+  averageSPO2:      [ Number ]
 });
 
 let User = db.model("User", userSchema);
 
 module.exports = User;
-  

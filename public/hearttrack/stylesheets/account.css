@@ -35,6 +35,13 @@
 }
 
 .btn {
-  margin-top: 6px;
+  margin-top: 10px;
   margin-bottom: 6px;
+  margin-right: 25px;
+  width: 110px;
+  text-align: center;
+}
+
+td {
+  width: 25%;
 }

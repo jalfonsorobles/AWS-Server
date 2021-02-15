@@ -18,14 +18,15 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   $('#main').show();
 
   // Add the devices to the list before the list item for the add device button (link) and
-  // populates the options to ping and signal device.
+  // populates the options to ping and signal device(s).
   for (let device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-      device.deviceId + "<br>APIKEY: " + device.apikey +
+      device.deviceId + "<br>APIKEY: " + device.apiKey +
       "<br><button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
       "<span id='ping-" + device.deviceId + "-message'></span>" + "<br><button id='signal-" + device.deviceId +
       "' class='waves-effect waves-light btn'>Signal</button> " +
       "<span id='signal-" + device.deviceId + "-message'></span>" + "</li>");
+
     $("#ping-" + device.deviceId).click(function(event) {
       pingDevice(event, device.deviceId);
     });
@@ -35,8 +36,27 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
     });
   }
 
+  // If no data stored, hide html content designated for data
+  if (Object.keys(data.readings).length == 0) {
+    $("#data").hide();
+  }
 
+  // Populating data passed from
+  else {
+    let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+
+    for (let reading of data.readings) {
+      let date = getDate(new Date(reading.date));
+      let time = getTime(new Date(reading.date));
+
+      str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
+      "</td><td>" + reading.averageSPO2 + "</td></tr>"
+    }
+
+    $("#addDataTable").html(str + "</table>");
+  }
 }
+
 
 // Case where ajax GET request failed
 function accountInfoError(jqXHR, textStatus, errorThrown) {
@@ -67,11 +87,12 @@ function registerDevice() {
      .done(function (data, textStatus, jqXHR) {
        // Add new device to the device list
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-       $("#deviceId").val() + "<br>APIKEY: " + data["apikey"] + "<br><button id='ping-" + data["deviceId"] +
+       $("#deviceId").val() + "<br>APIKEY: " + data["apiKey"] + "<br><button id='ping-" + data["deviceId"] +
         "' class='waves-effect waves-light btn'>Ping</button> " +
         "<span id='ping-" + data["deviceId"] + "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
         "' class='waves-effect waves-light btn'>Signal</button> " +
         "<span id='signal-" + data["deviceId"] + "-message'></span>" + "</li>");
+
          $("#ping-" + data["deviceId"]).click(function(event) {
            pingDevice(event, data["deviceId"]);
          });
@@ -88,6 +109,7 @@ function registerDevice() {
      });
 }
 
+// Passes deviceId to endpoint that will send POST request to ping device
 function pingDevice(event, deviceId) {
   $("#ping-" + deviceId + "-message").html("");
    $.ajax({
@@ -108,6 +130,7 @@ function pingDevice(event, deviceId) {
     });
 }
 
+// Passes deviceId to endpoint that will send POST request to signal device
 function signalDevice(event, deviceId) {
 
    $.ajax({
@@ -131,8 +154,6 @@ function signalDevice(event, deviceId) {
             $("#error").show();
         }
     });
-
-
 }
 
 // Show add device form and hide the add device button (really a link)
@@ -166,3 +187,18 @@ $(function() {
   $("#registerDevice").click(registerDevice);
   $("#cancel").click(hideAddDeviceForm);
 });
+
+
+function getDate(utcDate) {
+  let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  let date = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+
+  return date;
+}
+
+function getTime(utcDate) {
+  options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+  let time = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+
+  return time;
+}
