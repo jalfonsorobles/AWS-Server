@@ -7,7 +7,6 @@ let Device = require("../models/device");
 let User = require("../models/user");
 
 let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
-let particleAccessToken = fs.readFileSync(__dirname + '/../../particleAccessToken').toString();
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -29,8 +28,6 @@ router.post('/register', function(req, res, next) {
     apiKey : "none",
     deviceId : "none"
   };
-
-  let deviceExists = false;
 
   // Ensure the request includes the deviceId parameter
   if(!req.body.hasOwnProperty("deviceId")) {
@@ -66,9 +63,9 @@ router.post('/register', function(req, res, next) {
   }
 
   // See if device is already registered
-  Device.findOne({deviceId: req.body.deviceId}, {useFindAndModify: false}, function(err, device) {
+  Device.findOne({ deviceId: req.body.deviceId }, { useFindAndModify: false }, function(err, device) {
     if (device !== null) {
-      responseJson.message = "Device ID " + req.body.deviceId + " already registered.";
+      responseJson.message = "Device ID: " + req.body.deviceId + " already registered.";
       return res.status(400).json(responseJson);
     }
 
@@ -96,7 +93,7 @@ router.post('/register', function(req, res, next) {
           responseJson.registered = true;
           responseJson.apiKey = deviceApikey;
           responseJson.deviceId = req.body.deviceId;
-          responseJson.message = "Device ID " + req.body.deviceId + " was registered.";
+          responseJson.message = "Device ID: " + req.body.deviceId + " was registered.";
 
           // Add this device to the userDevices array in database
           User.findOneAndUpdate(
@@ -118,6 +115,91 @@ router.post('/register', function(req, res, next) {
     }
   });
 });
+
+// Endpoint to remove a device using device ID
+router.post('/remove', function(req, res, next) {
+  let responseJson = {
+    removed: false,
+    message : ""
+  };
+
+  // Ensure the request includes the deviceId parameter
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing device ID.";
+    return res.status(400).json(responseJson);
+  }
+
+  let email = "";
+
+  // If authToken provided, use email in authToken
+  if (req.headers["x-auth"]) {
+
+    // AuthToken is valid
+    try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+      email = decodedToken.email;
+    }
+
+    // AuthToken is invalid
+    catch (ex) {
+      responseJson.message = "Invalid authorization token.";
+      return res.status(401).json(responseJson);
+    }
+  }
+
+  else {
+    // Ensure the request includes the email parameter
+    if(!req.body.hasOwnProperty("email")) {
+      responseJson.message = "Invalid authorization token or missing email address.";
+      return res.status(401).json(responseJson);
+    }
+    email = req.body.email;
+  }
+
+  // See if device is registered
+  Device.findOne({ deviceId: req.body.deviceId }, { useFindAndModify: false }, function(err, device) {
+
+    // Device is not in database
+    if (device == null) {
+      responseJson.message = "Device ID: " + req.body.deviceId + " is not registered.";
+      return res.status(400).json(responseJson);
+    }
+
+    // Delete the device document from database
+    else {
+      Device.deleteOne({ deviceId: req.body.deviceId }, function(err, succ) {
+
+        if (err) {
+          responseJson.message = err;
+          return res.status(400).json(responseJson);
+        }
+
+        else {
+          responseJson.removed = true;
+          responseJson.message = "Device ID: " + req.body.deviceId + " was removed.";
+
+          // Remove this device from the userDevices array in database
+          User.findOneAndUpdate(
+            { email: email },
+            { $pull: { userDevices: req.body.deviceId } }, function (error, success) {
+
+            if (error) {
+              responseJson.message += " Cannot remove device from user's database."
+              console.log(error);
+              return res.status(400).json(responseJson);
+            }
+
+            else {
+              return res.status(201).json(responseJson);
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+
 
 // POST request to api.particle.io to ping device
 router.post('/ping', function(req, res, next) {
@@ -210,27 +292,40 @@ router.post('/signal', function(req, res, next) {
   let particleAccessToken = "bbf6d7f64a77a485508eedf56e1a6573bfc962e1";
 
   // Start the signaling
-  superagent
-  .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
-  .type('application/x-www-form-urlencoded')
-  .send({ signal: 1, access_token : particleAccessToken })
-  .end((err, response) => {
+  if(req.body.signalCode == 1) {
+    superagent
+    .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
+    .type('application/x-www-form-urlencoded')
+    .send({ signal: 1, access_token : particleAccessToken })
+    .end((err, response) => {
 
-    setTimeout(timer, 10000);
+      // Device is connected and signaling
+      if(response.body.connected == true) {
+        responseJson.success = true;
+        responseJson.message = "Device now signaling";
+      }
 
-    // Stop the signaling
-    function timer() {
-      superagent
-      .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
-      .type('application/x-www-form-urlencoded')
-      .send({ signal: 0, access_token : particleAccessToken })
-      .end((err, response) => {});
-    }
-
-    responseJson.success = true;
-    responseJson.message = "Device now signaling";
+      // Device is not connected
+      else {
+        responseJson.success = false;
+        responseJson.message = "Device not connected";
+      }
     return res.status(200).json(responseJson);
-  });
+    });
+  }
+
+  // Stop the signaling
+  else if(req.body.signalCode == 0) {
+    superagent
+    .put("https://api.particle.io/v1/devices/" + req.body.deviceId)
+    .type('application/x-www-form-urlencoded')
+    .send({ signal: 0, access_token : particleAccessToken })
+    .end((err, response) => {
+      responseJson.success = true;
+      responseJson.message = "Device stopped signaling";
+      return res.status(200).json(responseJson);
+    });
+  }
 });
 
 module.exports = router;

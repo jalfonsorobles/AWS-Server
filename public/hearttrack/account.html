@@ -31,7 +31,7 @@
 	</ul>
 	<nav>
 		<div class="nav-wrapper blue-grey darken-2">
-			<a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">Holz</span></a>
+			<a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">HeartTrack</span></a>
 			<ul class="right ">
 				<!-- Dropdown Trigger -->
 	      <li><a class='dropdown-trigger btn' href='#' data-target='dropdown1'><i class="material-icons">more_vert</i></a></li>
@@ -48,20 +48,54 @@
 				<li class="collection-item">Email: <span id="email"></span></li>
 				<li class="collection-item">Name: <span id="fullName"></span></li>
 				<li class="collection-item">Last Access: <span id="lastAccess"></span></li>
+
+        <li class="collection-item" id="updateNameForm">
+					<label for="updateFullName">Full Name:</label>
+					<input type="text" id="updateFullName" name="updateFullName" col="30">
+					<button id="updateName" class="waves-effect waves-light btn">Update Name</button>
+					<button id="cancelUpdateName" class="waves-effect waves-light btn">Cancel</button>
+				</li>
+				<li class="collection-item" id="updateNameControl"><a href="#!" id="updateNameLink">Update Name</a></li>
+
+        <li class="collection-item" id="updatePasswordForm">
+					<label id="newPasswordLabel" for="newPassword">New Password:</label>
+					<input type="text" id="newPassword" name="newPassword" col="30"><br>
+          <label id="confirmNewPasswordLabel" for="confirmNewPassword">Confirm New Password:</label>
+					<input type="text" id="confirmNewPassword" name="confirmNewPassword" col="30">
+					<button id="updatePassword" class="waves-effect waves-light btn">Update Password</button>
+					<button id="cancelUpdatePassword" class="waves-effect waves-light btn">Cancel</button>
+				</li>
+				<li class="collection-item" id="updatePasswordControl"><a href="#!" id="updatePasswordLink">Update Password</a></li>
 			</ul>
+      <div id="passwordErrors">
+        <ul id="passwordErrorsList"></ul>
+      </div>
+      <div id="fullNameErrors">
+        <ul id="fullNameErrorsList"></ul>
+      </div>
+      <div id="messagesUser"></div>
 
 			<ul class="collection with-header" id="devices">
 				<li class="collection-header">
 					<h5>Devices</h5>
 				</li>
 				<li class="collection-item" id="addDeviceForm">
-					<label for="deviceId">New Device ID:</label>
-					<input type="text" id="deviceId" name="deviceId" col="30">
+					<label for="addDeviceId">New Device ID:</label>
+					<input type="text" id="addDeviceId" name="addDeviceId" col="30">
 					<button id="registerDevice" class="waves-effect waves-light btn">Register</button>
-					<button id="cancel" class="waves-effect waves-light btn">Cancel</button>
+					<button id="cancelRegister" class="waves-effect waves-light btn">Cancel</button>
 				</li>
-				<li class="collection-item" id="addDeviceControl"><a href="#!" id="addDevice">Add Device</a></li>
+				<li class="collection-item" id="addDeviceControl"><a href="#!" id="addDeviceLink">Add Device</a></li>
+
+        <li class="collection-item" id="deleteDeviceForm">
+					<label for="deleteDeviceId">Remove Device with ID:</label>
+					<input type="text" id="deleteDeviceId" name="deleteDeviceId" col="30">
+					<button id="removeDevice" class="waves-effect waves-light btn">Remove</button>
+					<button id="cancelDelete" class="waves-effect waves-light btn">Cancel</button>
+				</li>
+        <li class="collection-item" id="deleteDeviceControl"><a href="#!" id="deleteDeviceLink">Remove Device</a></li>
 			</ul>
+      <div id="messagesDevice"></div>
 
       <ul class="collection with-header" id="data">
 				<li class="collection-header">

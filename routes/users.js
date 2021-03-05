@@ -18,8 +18,8 @@ router.post('/register', function(req, res) {
 
     // Error hashing password
     if(err) {
-      console.log("error hashing password");
-      res.status(400).json({success : false, message : err.errmsg});
+      console.log("Error hashing password");
+      res.status(400).json({ success: false, message: err });
     }
 
     // New User object is created from req.body parameters and hashed password
@@ -32,18 +32,18 @@ router.post('/register', function(req, res) {
       });
 
       // Saving newUser to the database
-      newUser.save(function(err, user) {
+      newUser.save(function(error, user) {
 
         // Error in connecing to database and saving newUser
-        if(err) {
-          console.log("error in Saving user to database");
-          res.status(400).json({success: false, message: err.errmsg});
+        if(error) {
+          console.log("Error in Saving user to database");
+          res.status(400).json({ success: false, message: error });
         }
 
         // User object was successfully added to database
         else {
           console.log("User was added successfully to database");
-          res.status(201).json({success: true, message: "Account for " + user.fullName + " has been created."});
+          res.status(201).json({ success: true, message: "Account for " + user.fullName + " has been created." });
         }
       });
     }
@@ -54,7 +54,7 @@ router.post('/register', function(req, res) {
 router.post('/signin', function(req, res) {
 
   // Returns one User object if the email is found in database
-  User.findOne({email: req.body.email}, function(err, user) {
+  User.findOne({ email: req.body.email }, function(err, user) {
 
     // Case where it cannot connect to database
     if (err) {
@@ -66,19 +66,36 @@ router.post('/signin', function(req, res) {
       res.status(401).json({ success: false, message: "Email or password invalid." });
     }
 
-    // Case where user was found in database but it will be authenticated
+    // Case where user was found in database but has to be authenticated
     else {
-      bcrypt.compare(req.body.password, user.passwordHash, function(err, valid) {
+      bcrypt.compare(req.body.password, user.passwordHash, function(error, valid) {
+        console.log(req.body.password);
+        console.log(user.passwordHash);
+        console.log(error);
 
         // There is an error with the code that it was unable to decrypt passwordHash
-        if (err) {
+        if (error) {
           res.status(401).json({ success: false, message: "Error authenticating. Contact support." });
         }
 
         // Both password and uncrypted passwordHash match & authToken is created
         else if(valid) {
-          let authToken = jwt.encode({email: req.body.email}, secret);
-          res.status(201).json({ success: true, authToken: authToken });
+          let authToken = jwt.encode({ email: req.body.email }, secret);
+
+          // Update lastAccess date in database
+          User.findOneAndUpdate(
+            { email: req.body.email },
+            { lastAccess: Date.now() }, function (error, success) {
+
+            if (error) {
+              console.log(error);
+              return res.status(400).json({ success: false, message: "Error contacting database"});
+            }
+
+            else {
+              res.status(201).json({ success: true, authToken: authToken });
+            }
+          });
         }
 
         // Authentication failed – password and passwordHash do not match
@@ -130,6 +147,7 @@ router.get('/account', function(req, res) {
         accountInfo["lastAccess"] = user.lastAccess;
         accountInfo["devices"] = [];
         accountInfo["readings"] = [];
+        accountInfo["alertFlag"] = user.alertFlag;
 
         // Adding readings to the response object
         Reading.find({userEmail: decodedToken.email}, function(err, readings) {
@@ -173,5 +191,86 @@ router.get('/account', function(req, res) {
     res.status(401).json({ success: false, message: "Invalid authentication token."});
   }
 });
+
+// Update full name on user account
+router.post('/updateName', function(req, res) {
+
+  // If authToken provided, use email in authToken
+  if (req.headers["x-auth"]) {
+
+    // AuthToken is valid
+    try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+      email = decodedToken.email;
+    }
+
+    // AuthToken is invalid
+    catch (ex) {
+      return res.status(401).json({ success: false, message: "Invalid authorization token." });
+    }
+  }
+
+  // Update full name in database
+  User.findOneAndUpdate(
+    { email: email },
+    { fullName: req.body.fullName }, function (error, success) {
+
+    if (error) {
+      console.log(error);
+      return res.status(400).json({ success: false, message: "Error contacting database" });
+    }
+
+    else {
+      res.status(201).json({ success: true, message: "Name updated successfully" });
+    }
+  });
+});
+
+// Update password on user account
+router.post('/updatePassword', function(req, res) {
+
+  // If authToken provided, use email in authToken
+  if (req.headers["x-auth"]) {
+
+    // AuthToken is valid
+    try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+      email = decodedToken.email;
+    }
+
+    // AuthToken is invalid
+    catch (ex) {
+      return res.status(401).json({ success: false, message: "Invalid authorization token." });
+    }
+  }
+
+  // Hashing the password ten rounds
+  bcrypt.hash(req.body.newPassword, 10, function(err, hash) {
+
+    // Error hashing password
+    if(err) {
+      console.log("Error hashing password: " + err);
+      res.status(400).json({success: false, message: err.errmsg});
+    }
+
+    // Hashed password is used to update database
+    else {
+      User.findOneAndUpdate(
+        { email: email },
+        { passwordHash: hash }, function (error, success) {
+
+        if (error) {
+          console.log(error);
+          return res.status(400).json({ success: false, message: "Error contacting database" });
+        }
+
+        else {
+          res.status(201).json({ success: true, message: "Password updated successfully" });
+        }
+      });
+    }
+  });
+});
+
 
 module.exports = router;

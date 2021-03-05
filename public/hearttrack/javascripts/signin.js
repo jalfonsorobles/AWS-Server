@@ -5,7 +5,6 @@ if (window.localStorage.getItem("authToken")) {
 
 // Ajax POST function that will execute when client side form is submitted
 function sendSigninRequest() {
-  console.log("inside sendsigninRequest");
   $.ajax({
     url: '/users/signin',
     method: 'POST',

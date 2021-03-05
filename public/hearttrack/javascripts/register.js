@@ -5,7 +5,7 @@ function sendRegisterRequest() {
   let passwordConfirm = $('#passwordConfirm').val();
 
   // FIXME: add error attributes when submitting incomplete form
-  
+
   // Check to make sure the passwords match in client side before submitting
   if (password != passwordConfirm) {
     $('#ServerResponse').html("<div class='error'>Passwords do not match.</div>");
@@ -16,25 +16,25 @@ function sendRegisterRequest() {
   else {
     $('#ServerResponse').hide();
   }
-  
+
   // ajax POST that is executed when client side form is submitted
   $.ajax({
     url: '/users/register',
     type: 'POST',
     contentType: 'application/json',
-    data: JSON.stringify({email:email, fullName:fullName, password: password}),
+    data: JSON.stringify({ email: email, fullName: fullName, password: password }),
     dataType: 'json'
   })
     .done(registerSuccess)
     .fail(registerError);
 }
 
-// Success in registering new user 
+// Success in registering new user
 function registerSuccess(data, textStatus, jqXHR) {
   console.log("success registering");
 
   // Redirect client to signin.html to signin and verify credentials
-  if (data.success) {  
+  if (data.success) {
     window.location = "signin.html";
   }
 
@@ -54,7 +54,7 @@ function registerError(jqXHR, textStatus, errorThrown) {
     $('#ServerResponse').html("<div class='error'>Server could not be reached.</div>");
     $('#ServerResponse').show();
   }
-  
+
   // Display other error other than a 404
   else {
     $('#ServerResponse').html("<div class='error'>Error: " + jqXHR.responseJSON.message + "</div>");

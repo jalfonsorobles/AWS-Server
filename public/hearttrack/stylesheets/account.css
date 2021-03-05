@@ -18,8 +18,35 @@
    padding-top: 5px;
 }
 
-#addDeviceForm, #main, #error {
+/* #passwordErrors, #fullNameErrors {
+  margin-left: 30px;
+  display: none;
+} */
+
+#messagesUser, #messagesDevice {
+  margin-left: 30px;
+  display: none;
+  color: #26a69a;
+  font-weight: bold;
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+
+#passwordErrorsList > li , #fullNameErrorsList > li{
+  list-style-type: disc;
+  font-weight: bold;
+  color: red;
+  margin-left: 30px;
+}
+
+#addDeviceForm, #deleteDeviceForm, #updateNameForm, #updatePasswordForm,  #main, #error, #passwordErrors,
+#fullNameErrors {
    display: none;
+}
+
+.errorClass {
+  color: red;
+  font-weight: bold;
 }
 
 .input-field input {
@@ -38,7 +65,7 @@
   margin-top: 10px;
   margin-bottom: 6px;
   margin-right: 25px;
-  width: 110px;
+  width: 190px;
   text-align: center;
 }
 
