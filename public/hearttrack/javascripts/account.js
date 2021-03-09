@@ -110,8 +110,11 @@ function registerDevice() {
      })
      .fail(function(jqXHR, textStatus, errorThrown) {
        let response = JSON.parse(jqXHR.responseText);
-       $("#error").html("Error: " + response.message);
-       $("#error").show();
+       hideAddDeviceForm();
+       $("#messagesDevice").html(response.message);
+       $("#messagesDevice").css('color', 'red');
+       $("#messagesDevice").show();
+       setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
      });
 }
 
@@ -498,9 +501,8 @@ $(function() {
       $("#addDataTable").html(str + "</table>");
 
       // Alert that it's time for new reading
-      console.log(data.alertFlag);
       if(data.alertFlag == 'true') {
-        window.alert("Time to take a reading. Click 'Close' to continue");
+        console.log("Time to take a reading. Click 'Close' to continue" + data.alertFlag);
       }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
