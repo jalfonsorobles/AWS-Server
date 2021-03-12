@@ -3,8 +3,8 @@
 Link: [http://3.133.86.226:3000](http://3.133.86.226:3000)
 
 The sign in credentials of the shown account are:
-Email: 		parker@gmail.com
-Password: 	PeterParker123
+    Email: 		parker@gmail.com
+    Password: 	PeterParker123
 
 Using a heart rate and SPO2 sensor, an AWS EC2 instance server and a Particle Argon Wi-Fi development kit, a user can create an account and register a device that will take sensor readings, organize them and display them in the user's home screen. A user can register more than one device, change his account’s name, password and view the latest login date and time as well as unregister, ping and signal devices.
 ***
