@@ -9,17 +9,21 @@ Using a heart rate and SPO2 sensor, an AWS EC2 instance server and a Particle Ar
 The readings/data endpoint consists of several steps:
 
 1. **POST request is sent** –– The device sends a POST request to the server through a Webhook integration using the URL [http://3.133.86.226:3000/readings/data](http://3.133.86.226:3000/readings/data). The  request header specifies the content type and response format requested:  
-    {  
-      "Content-Type": "application/json",  
-      "Accept": "application/json"  
-    }
+```JSON
+{  
+  "Content-Type": "application/json",  
+  "Accept": "application/json"  
+}
+```
   The request body contains the JSON-formatted data of the device ID, its registered API key (determined when the device is initially registered under a user) and the average beats per minute and SPO2 readings:  
-`{  
+```JSON
+{  
     "deviceId": "{{{PARTICLE_DEVICE_ID}}}",  
     "apiKey": "vpke5Vo3Ntc1w7gzCLgQbTaJcHQXn5WZ",  
     "avgBPM": "{{avgBPM}}",  
     "avgSPO2": "{{avgSPO2}}"  
-}`  
+}
+``` 
 
 2. **Server searches and verifies device** –– When this request is received, the server creates a JSON response with parameters:  
 `responseJson = {  
