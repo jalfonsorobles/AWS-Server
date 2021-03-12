@@ -265,7 +265,7 @@ router.post('/ping', function(req, res, next) {
   });
 });
 
-// Signals the device for 10 seconds approximately
+// Signals the device or unsignals depending on previous condition 
 router.post('/signal', function(req, res, next) {
 
   let responseJson = {
