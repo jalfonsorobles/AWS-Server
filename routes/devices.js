@@ -7,6 +7,7 @@ let Device = require("../models/device");
 let User = require("../models/user");
 
 let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
+let particleAccessToken = fs.readFileSync(__dirname + '/../../particleAccessToken').toString().replace( /[\r\n]+/gm, "" );
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -203,7 +204,6 @@ router.post('/remove', function(req, res, next) {
 
 // POST request to api.particle.io to ping device
 router.post('/ping', function(req, res, next) {
-  let particleAccessToken = "bbf6d7f64a77a485508eedf56e1a6573bfc962e1";
 
   let responseJson = {
     success: false,
@@ -288,8 +288,6 @@ router.post('/signal', function(req, res, next) {
     responseJson.message = "Invalid authorization token.";
     return res.status(400).json(responseJson);
   }
-
-  let particleAccessToken = "bbf6d7f64a77a485508eedf56e1a6573bfc962e1";
 
   // Start the signaling
   if(req.body.signalCode == 1) {

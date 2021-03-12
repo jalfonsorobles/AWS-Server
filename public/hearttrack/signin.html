@@ -1,39 +1,52 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  
+
 <head>
 	<meta charset="utf-8">
 	<!--Let browser know website is optimized for mobile-->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="shortcut icon" href="./images/favicon.ico"/>
 	<title>HeartTrack - Sign In</title>
-	<!-- Import jQuery -->
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js">
-	</script>
+  <!-- Import jQuery -->
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
   <script src="./javascripts/signin.js"></script>
 	<link href="./stylesheets/signin.css" rel="stylesheet">
 </head>
 
 <body>
-  <h2>Account Sign In</h2>
-  <div>
-    <label class="label" for="email">Email</label>
-    <input type="email" id="email" name="email" >
-  </div>      
-  <div>
-    <label class="label" for="password">Password</label>
-    <input type="password" id="password" name="password" >
-  </div>
-  <div class="submit">
-    <button id="signin">Sign In</button>
-    <div>
-      Don't have an account? <a href="./register.html">Register</a>
+
+  <nav>
+    <div class="nav-wrapper blue-grey darken-2">
+     <a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">HeartTrack</span></a>
+    </div>
+  </nav>
+
+  <div class="row">
+    <div class="col s12 m6">
+      <div class="card blue-grey">
+        <div class="card-content white-text">
+          <span class="card-title">Sign In</span>
+          <div class="input-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="white-text">
+          </div>
+          <div class="input-field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="white-text">
+          </div>
+          <div class="card-action">
+            <div><button id="signin" class="waves-effect waves-light btn">Sign In</button></div>
+            <div id="account">Don't have an account <a href="./register.html">Register</a></div>
+          </div>
+        </div>
+        <div class="card-panel blue-text" id="ServerResponse" style="display: none"></div>
+      </div>
     </div>
   </div>
-  <div id="ServerResponse"></div>
-	<footer>
-		Jesus Alfonso Robles – Electrical and Computer Engineering, University of Arizona
-	</footer>
-</body>
-
 </html>
