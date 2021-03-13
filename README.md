@@ -41,7 +41,7 @@ responseJson = {
 ```JavaScript
 Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {...}
 ```
-  If there is an error connecting to the database, the server compiles a JSON response with  with a 400 status code and the JSON response with the  error message Cannot connect to database. and a false in the posted status. In the case that the database does not find a device object with the deviceId from the request, it responds with the message "Device ID: " + `req.body.deviceId` + " is not valid or not registered.", a false in the posted status and a 401 response code. In the case that there is a match in the database search, the server then compares the API key stored in the found device object with that included in the request body and compiles the response below in case of a failed match:
+If there is an error connecting to the database, the server compiles a JSON response with  with a 400 status code and the JSON response with the  error message Cannot connect to database. and a false in the posted status. In the case that the database does not find a device object with the deviceId from the request, it responds with the message "Device ID: " + `req.body.deviceId` + " is not valid or not registered.", a false in the posted status and a 401 response code. In the case that there is a match in the database search, the server then compares the API key stored in the found device object with that included in the request body and compiles the response below in case of a failed match:
 ```JavaScript
 if (req.body.apiKey != device.apiKey) {  
   responseJson.message = "Access Denied: Device API key is not valid.";  
@@ -72,7 +72,7 @@ User.findOneAndUpdate(
 ```
   As previously noted, if the server encounters an error contacting the database it will respond with the 400 response code and the corresponding error message. If user is found, the server pushes the values for average beats per minute (`avgBPM`) and average SPO2 (`avgSPO2`) to the arrays that hold these readings in the user's object parameters. The last update that takes place is the alert flag (`alertFLag`), which is set to `false`, meaning that the user has recorded a new reading. This flag will be changed to `true` by the particle device if it does not record another reading in the pre-determined time of 30 minutes.
 
-  5. Lastly, the server returns a 201 response code, the message "Data was saved successfully." and the posted parameter with value of true.  
+  5. Lastly, the server returns a 201 response code, the message "Data was saved successfully" and the posted parameter with value of `true`.  
 
 ## Interesting discoveries
 * The function 'innerHTML' does not work with JQuery commands:  
@@ -82,7 +82,7 @@ User.findOneAndUpdate(
 document.getElementById("signal-" + deviceId).innerText = "SIGNAL";
 ```
 
-* Using fs.readFileSync adds a newline character '\n' at the end. When sending the request to particle.io, the particle token parameter was very delicate with this and rejected the request as the token had the new line characer. A regex to get rid of the new line was used:
+* Using `fs.readFileSync()` adds a newline character `\n` at the end of the stream. When sending the request to particle.io, the particle token parameter was very delicate with this and rejected the request as the token had the new line characer. A regex to get rid of the new line was used:
 ```JavaScript
 let particleAccessToken = fs.readFileSync(__dirname + '/../../particleAccessToken').toString().replace( /[\r\n]+/gm, "" );
 ```
