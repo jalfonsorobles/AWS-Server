@@ -3,6 +3,7 @@
 Link: [http://3.133.86.226:3000](http://3.133.86.226:3000)
 
 The sign in credentials of the shown account are:  
+
 Email: 		parker@gmail.com  
 Password: 	PeterParker123
 
@@ -66,8 +67,8 @@ let newReading = new Reading({
 ```JavaScript
 User.findOneAndUpdate(  
   { email: device.userEmail },  
-  { $push: { averageHeartRate: req.body.avgBPM, averageSPO2: req.body.avgSPO2 }, alertFlag: false },  
-  function (err, user) {...});
+  { $push: { averageHeartRate: req.body.avgBPM, averageSPO2: req.body.avgSPO2 },  
+  alertFlag: false }, function (err, user) {...});
 ```
   As previously noted, if the server encounters an error contacting the database it will respond with the 400 response code and the corresponding error message. If user is found, the server pushes the values for average beats per minute (`avgBPM`) and average SPO2 (`avgSPO2`) to the arrays that hold these readings in the user's object parameters. The last update that takes place is the alert flag (`alertFLag`), which is set to `false`, meaning that the user has recorded a new reading. This flag will be changed to `true` by the particle device if it does not record another reading in the pre-determined time of 30 minutes.
 
@@ -77,7 +78,7 @@ User.findOneAndUpdate(
 * The function 'innerHTML' does not work with JQuery commands:  
 ```JavaScript
 // Took me a while to figure out that innerHTML does not work with JQuery >:)  
-// This is wrong: $("signal-" + deviceId). innerHTML = "SIGNAL";
+// This is wrong: $("signal-" + deviceId).innerHTML = "SIGNAL";
 document.getElementById("signal-" + deviceId).innerText = "SIGNAL";
 ```
 
