@@ -1,0 +1,78 @@
+#logo {
+    margin: 5px;
+    width: 50px;
+}
+
+#name {
+    font-size: 32pt;
+    vertical-align: top;
+}
+
+#messagesUser, #messagesDevice, #messagesWeeklySummary, #messagesDaySummary, #messagesAllData {
+  margin-left: 30px;
+  display: none;
+  color: #26a69a;
+  font-weight: bold;
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+
+#passwordErrorsList > li , #fullNameErrorsList > li, #deviceErrorsList > li, #dayChartErrorsList > li {
+  list-style-type: disc;
+  font-weight: bold;
+  color: red;
+  margin-left: 30px;
+}
+
+#addDeviceForm, #deleteDeviceForm, #updateNameForm, #updatePasswordForm,  #main, #error, #passwordErrors,
+#fullNameErrors, #ServerResponse, #signInFormErrors, #deviceErrors, #dayChartErrors, #messagesWeeklySummary,
+#messagesDaySummary, #weeklyChartHeartRate, #weeklyChartSPO2, #dayChartHeartRate,
+#dayChartSPO2, #viewDaySummaryControl, #viewDaySummaryControlDiv, #messagesAllData {
+   display: none;
+}
+
+.errorClass {
+  /* text-shadow : 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black; */
+  color: red;
+  font-weight: bold;
+}
+
+.collection {
+  padding-bottom: -4px;
+}
+
+.input-field input {
+   color: white;
+}
+
+canvas {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.chartCanvas {
+  width: 80vw;
+  margin: auto;
+}
+
+.btn {
+  margin-top: 10px;
+  margin-bottom: 6px;
+  margin-right: 25px;
+  width: 190px;
+  text-align: center;
+}
+
+.dropdown-trigger {
+  width: 20vw;
+}
+
+.page-footer {
+  background-color: #26a69a;
+  text-align: center;
+  height: 50px;
+}
+
+td {
+  width: 25%;
+}

@@ -5,18 +5,44 @@ if (window.localStorage.getItem("authToken")) {
 
 // Ajax POST function that will execute when client side form is submitted
 function sendSigninRequest() {
-  $.ajax({
-    url: '/users/signin',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ email: $('#email').val(), password: $('#password').val() }),
-    dataType: 'json'
-  })
-    .done(signinSuccess)
-    .fail(signinFailure);
-}
 
-// FIXME: add error attributes when submitting incomplete form
+  // Hide the contents of the error div every time form is submited
+  $('#ServerResponse').hide();
+  $("#emailLabel").removeAttr("style");
+  $("#passwordLabel").removeAttr("style");
+
+  // Missing email when form submitted
+  if($('#email').val() == "" || $('#password').val() == "") {
+
+    if($('#email').val() == "") {
+      $("#emailLabel").css({ "text-shadow" : "0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black",
+      "color" : "red", "font-weight" : "bold" });
+    }
+
+    if($('#password').val() == "") {
+      $("#passwordLabel").css({ "text-shadow" : "0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black",
+      "color" : "red", "font-weight" : "bold" });
+    }
+
+    $("#ServerResponse").html("<div class='errorClass'> Error: Enter an email address and password.</div>");
+    $('#ServerResponse').show();
+  }
+
+  // Complete form submitted
+  else {
+    $('#ServerResponse').hide();
+
+    $.ajax({
+      url: '/users/signin',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ email: $('#email').val().toLowerCase(), password: $('#password').val() }),
+      dataType: 'json'
+    })
+      .done(signinSuccess)
+      .fail(signinFailure);
+  }
+}
 
 // User was authenticated successfully and redirected to account.html
 function signinSuccess(data, testStatus, jqXHR) {
@@ -28,13 +54,13 @@ function signinFailure(jqXHR, testStatus, errorThrown) {
 
   // Case where there was an authentication failure
   if (jqXHR.status == 401) {
-     $('#ServerResponse').html("<div class='error'>Error: " + jqXHR.responseJSON.message +"</div>");
+     $('#ServerResponse').html("<div class='errorClass'>Error: " + jqXHR.responseJSON.message +"</div>");
      $('#ServerResponse').show();
   }
 
   // Case where the server could not be reached
   else {
-     $('#ServerResponse').html("<div class='error'>Server could not be reached.</div>");
+     $('#ServerResponse').html("<div class='errorClass'>Server could not be reached.</div>");
      $('#ServerResponse').show();
   }
 }

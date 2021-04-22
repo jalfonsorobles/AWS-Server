@@ -1,47 +1,73 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  
-<head>
-	<meta charset="utf-8">
-	<!--Let browser know website is optimized for mobile-->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="shortcut icon" href="./images/favicon.ico"/>
-	<title>HeartTrack - Register</title>
-	<!-- Import jQuery -->
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js">
-	</script>
-  <script src="./javascripts/register.js"></script>
-	<link href="./stylesheets/register.css" rel="stylesheet">
-</head>
 
-<body>
-  <h2>Account Registration</h2>
-  <div>
-    <label class="label"for="fullName">Full Name</label>
-    <input type="text" id="fullName" name="fullName" >
-  </div>
-  <div>
-    <label class="label" for="email">Email</label>
-    <input type="email" id="email" name="email" >
-  </div>      
-  <div>
-    <label class="label" for="password">Password</label>
-    <input type="password" id="password" name="password" >
-  </div>
-  <div>
-    <label class="label" for="passwordConfirm">Confirm Password</label>
-    <input type="password" id="passwordConfirm" name="passwordConfirm" >
-  </div>
-  <div class="submit">
-    <button id="register">Register</button>
-    <div>
-      Have an account? <a href="./signin.html">Sign In</a>
+  <head>
+    <meta charset="utf-8">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./images/favicon.ico"/>
+    <title>HeartTrack - Register</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css and materialize.js-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- Import jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <script src="./javascripts/register.js"></script>
+    <link href="./stylesheets/hearttrack.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <nav>
+      <div class="nav-wrapper blue-grey darken-2">
+        <a href="signin.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">HeartTrack</span></a>
+      </div>
+    </nav>
+
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card blue-grey ">
+          <div class="card-content white-text">
+            <span class="card-title">Account Registration</span>
+            <div class="input-field">
+              <label id="emailLabel" for="email">Email</label>
+              <input type="email" id="email" name="email" >
+            </div>
+            <div class="input-field">
+              <label id="fullNameLabel" for="fullName">Full Name</label>
+              <input type="text" id="fullName" name="fullName" >
+            </div>
+            <div class="input-field">
+              <label id="passwordLabel" for="password">Password</label>
+              <input type="password" id="password" name="password" >
+            </div>
+            <div class="input-field">
+              <label id="confirmPasswordLabel" for="passwordConfirm">Confirm Password</label>
+              <input type="password" id="passwordConfirm" name="passwordConfirm" >
+            </div>
+            <div class="card-action">
+              <div><a id="register" class="waves-effect waves-light btn">Register</a></div>
+              <div id="account">Have an account? <a href="signin.html">Sign In</a></div>
+            </div>
+          </div>
+          <div class="card-panel blue-text" id="passwordErrors">
+            <ul id="passwordErrorsList"></ul>
+          </div>
+          <div class="card-panel blue-text" id="ServerResponse"></div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div id="ServerResponse" style="display: none">></div>
-	<footer>
-		Jesus Alfonso Robles – Electrical and Computer Engineering, University of Arizona
-	</footer>
-</body>
 
+    <footer class="page-footer">
+		<div class="footer-copyright nav-wrapper blue-grey darken-2">
+			<div class="container">
+			<strong>HeartTrack</strong> by Jesus Alfonso Robles<br>University of Arizona Electrical and Computer Engineering
+			</div>
+		</div>
+	</footer>
+
+  </body>
 </html>

@@ -69,9 +69,6 @@ router.post('/signin', function(req, res) {
     // Case where user was found in database but has to be authenticated
     else {
       bcrypt.compare(req.body.password, user.passwordHash, function(error, valid) {
-        console.log(req.body.password);
-        console.log(user.passwordHash);
-        console.log(error);
 
         // There is an error with the code that it was unable to decrypt passwordHash
         if (error) {
@@ -163,6 +160,11 @@ router.get('/account', function(req, res) {
                                             averageHeartRate: reading.averageHeartRate,
                                             averageSPO2:      reading.averageSPO2});
             }
+
+            // Sort object by date, showing latest readings first
+            accountInfo["readings"].sort(function(a,b) {
+              return new Date(b.date) - new Date(a.date);
+            });
           }
         });
 
@@ -179,6 +181,78 @@ router.get('/account', function(req, res) {
             for(let device of devices) {
               accountInfo['devices'].push({deviceId: device.deviceId, apiKey: device.apiKey});
             }
+            res.status(200).json(accountInfo);
+          }
+        });
+      }
+    });
+  }
+
+  // Token was invalid
+  catch (ex) {
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+  }
+});
+
+// Retrieving account readings
+router.get('/readings', function(req, res) {
+
+  // Case where there does not exists an authToken
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+
+  // Retrieve authToken from headers and create accountInfo object
+  let authToken = req.headers["x-auth"];
+  let accountInfo = {};
+
+  // Try-catch method is needed as authToken throws exception when it cannot be decoded
+  try {
+
+    // Token was decoded successfully
+    let decodedToken = jwt.decode(authToken, secret);
+
+    // Find user in database by searching for email
+    User.findOne({email: decodedToken.email}, function(err, user) {
+
+      // Error when contacting database
+      if (err) {
+        res.status(400).json({ success: false,
+                               message: "Authentication token successful, but there is an error contacting database." });
+      }
+
+      if(user == null) {
+        window.localStorage.removeItem("authToken");
+        window.location.replace("signin.html");
+      }
+
+      // If successful, begin populating accountInfo object
+      else {
+        accountInfo["success"] = true;
+        accountInfo["email"] = user.email;
+        accountInfo["readings"] = [];
+        accountInfo["alertFlag"] = user.alertFlag;
+
+        // Adding readings to the response object
+        Reading.find({userEmail: decodedToken.email}, function(err, readings) {
+
+          if(err) {
+            res.status(400).json({success: false, message: "Error contacting database."});
+          }
+
+          else {
+
+            for(let reading of readings) {
+              accountInfo["readings"].push({date:             reading.date,
+                                            averageHeartRate: reading.averageHeartRate,
+                                            averageSPO2:      reading.averageSPO2});
+            }
+
+            // Sort object by date, showing latest readings first
+            accountInfo["readings"].sort(function(a,b) {
+              return new Date(b.date) - new Date(a.date);
+            });
             res.status(200).json(accountInfo);
           }
         });
@@ -271,6 +345,5 @@ router.post('/updatePassword', function(req, res) {
     }
   });
 });
-
 
 module.exports = router;

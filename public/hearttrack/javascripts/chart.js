@@ -1,544 +1,576 @@
-// // Ajax GET request that will use the header to send authToken and get account info to display
-// function sendAccountRequest() {
-//   $.ajax({
-//     url: '/users/account',
-//     method: 'GET',
-//     headers: { 'x-auth' : window.localStorage.getItem("authToken") },
-//     dataType: 'json'
-//   })
-//     .done(accountInfoSuccess)
-//     .fail(accountInfoError);
-// }
-//
-// // Case when ajax call is successful & html is filled with data object parameters
-// function accountInfoSuccess(data, textStatus, jqXHR) {
-//   let date = getDate(new Date(data.lastAccess));
-//   let time = getTime(new Date(data.lastAccess));
-//
-//   $('#email').html(data.email);
-//   $('#fullName').html(data.fullName);
-//   $('#lastAccess').html(time + " on " + date);
-//   $('#main').show();
-//
-//   // Add the devices to the list before the list item for the add device button (link) and
-//   // populates the options to ping and signal device(s).
-//   for (let device of data.devices) {
-//     $("#addDeviceForm").before("<li class='collection-item' id='device-" + device.deviceId + "'>ID: " +
-//     device.deviceId + "<br>APIKEY: " + device.apiKey + "<br><button id='ping-" + device.deviceId +
-//       "' class='waves-effect waves-light btn'>Ping</button> " + "<span id='ping-" + device.deviceId +
-//       "-message'></span>" + "<br><button id='signal-" + device.deviceId +
-//       "' class='waves-effect waves-light btn'>Signal</button> " + "<span id='signal-" + device.deviceId +
-//       "-message'></span>" + "</li>");
-//
-//     $("#ping-" + device.deviceId).click(function(event) {
-//       pingDevice(event, device.deviceId);
-//     });
-//
-//     $("#signal-" + device.deviceId).click(function(event) {
-//       signalDevice(event, device.deviceId);
-//     });
-//   }
-//
-//   // If no data stored, hide html content designated for data
-//   if (Object.keys(data.readings).length == 0) {
-//     $("#data").hide();
-//   }
-//
-//   // Populating data passed from
-//   else {
-//     let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
-//
-//     for (let reading of data.readings) {
-//       let date = getDate(new Date(reading.date));
-//       let time = getTime(new Date(reading.date));
-//
-//       str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
-//       "</td><td>" + reading.averageSPO2 + "</td></tr>"
-//     }
-//     $("#addDataTable").html(str + "</table>");
-//   }
-// }
-//
-// // Case where ajax GET request failed
-// function accountInfoError(jqXHR, textStatus, errorThrown) {
-//
-//   // Account authentication failed, authToken has to be deleted and user is redirected to signin.html
-//   if (jqXHR.status == 401) {
-//     window.localStorage.removeItem("authToken");
-//     window.location = "signin.html";
-//   }
-//
-//   // Print any other error in hidden div
-//   else {
-//     $(".error").html("Error: " + jqXHR.status + "this error");
-//     $(".error").show();
-//   }
-// }
-//
-// // Registers the specified device with the server.
-// function registerDevice() {
-//   $.ajax({
-//     url: '/devices/register',
-//     method: 'POST',
-//     headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//     contentType: 'application/json',
-//     data: JSON.stringify({ deviceId: $("#addDeviceId").val() }),
-//     dataType: 'json'
-//    })
-//      .done(function (data, textStatus, jqXHR) {
-//        // Add new device to the device list
-//        $("#addDeviceForm").before("<li class='collection-item' id='device-" + data["deviceId"] + "'>ID: " +
-//        $("#addDeviceId").val() + "<br>APIKEY: " + data["apiKey"] + "<br><button id='ping-" + data["deviceId"] +
-//         "' class='waves-effect waves-light btn'>Ping</button> " +
-//         "<span id='ping-" + data["deviceId"] + "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
-//         "' class='waves-effect waves-light btn'>Signal</button> " +
-//         "<span id='signal-" + data["deviceId"] + "-message'></span>" + "</li>");
-//
-//         $("#ping-" + data["deviceId"]).click(function(event) {
-//            pingDevice(event, data["deviceId"]);
-//         });
-//
-//         $("#signal-" + data["deviceId"]).click(function(event) {
-//            signalDevice(event, data["deviceId"]);
-//         });
-//
-//         $("#messagesDevice").html(data.message);
-//         hideAddDeviceForm();
-//         $("#messagesDevice").css('color', '#26a69a');
-//         $("#messagesDevice").show();
-//         setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-//      })
-//      .fail(function(jqXHR, textStatus, errorThrown) {
-//        let response = JSON.parse(jqXHR.responseText);
-//        hideAddDeviceForm();
-//        $("#messagesDevice").html(response.message);
-//        $("#messagesDevice").css('color', 'red');
-//        $("#messagesDevice").show();
-//        setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-//      });
-// }
-//
-// // Removes the specified device from the server.
-// function removeDevice() {
-//   $.ajax({
-//     url: '/devices/remove',
-//     method: 'POST',
-//     headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//     contentType: 'application/json',
-//     data: JSON.stringify({ 'deviceId': $("#deleteDeviceId").val() }),
-//     dataType: 'json'
-//    })
-//      .done(function (data, textStatus, jqXHR) {
-//        let response = JSON.parse(jqXHR.responseText);
-//        // Remove device from the device list
-//        $("#device-" + $("#deleteDeviceId").val()).remove();
-//        $("#messagesDevice").html(response.message);
-//        $("#messagesDevice").css('color', '#26a69a');
-//        hideDeleteDeviceForm();
-//        $("#messagesDevice").show();
-//        setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-//      })
-//      .fail(function(jqXHR, textStatus, errorThrown) {
-//        let response = JSON.parse(jqXHR.responseText);
-//        hideDeleteDeviceForm();
-//        $("#messagesDevice").html(response.message);
-//        $("#messagesDevice").css('color', 'red');
-//        $("#messagesDevice").show();
-//        setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-//      });
-// }
-//
-// // Passes deviceId to endpoint that will send POST request to ping device
-// function pingDevice(event, deviceId) {
-//   $("#ping-" + deviceId + "-message").html("");
-//    $.ajax({
-//         url: '/devices/ping',
-//         type: 'POST',
-//         headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//         data: { 'deviceId': deviceId, 'signalCode': 1 },
-//         responseType: 'json',
-//         success: function (data, textStatus, jqXHR) {
-//           let response = JSON.parse(jqXHR.responseText);
-//           $("#ping-" + deviceId + "-message").html(response.message);
-//         },
-//         error: function(jqXHR, textStatus, errorThrown) {
-//             var response = JSON.parse(jqXHR.responseText);
-//             $("#error").html("Error: " + response.message);
-//             $("#error").show();
-//         }
-//     });
-// }
-//
-// // Passes deviceId to endpoint that will send POST request to signal device
-// function signalDevice(event, deviceId) {
-//   $("#signal-" + deviceId + "-message").html("");
-//
-//   // Check whether device is signaling or not
-//   if(document.getElementById("signal-" + deviceId).innerText == "SIGNAL") {
-//     $.ajax({
-//       url: '/devices/signal',
-//       type: 'POST',
-//       headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//       data: { 'deviceId': deviceId, 'signalCode': 1 },
-//       responseType: 'json',
-//       success: function (data, textStatus, jqXHR) {
-//         let response = JSON.parse(jqXHR.responseText);
-//         $("#signal-" + deviceId + "-message").html(response.message);
-//
-//         if(response.success == true) {
-//           // Took me a while to figure out that innerHTML does not work with JQuery >:)
-//           document.getElementById("signal-" + deviceId).innerText = "STOP SIGNALING";
-//         }
-//       },
-//       error: function(jqXHR, textStatus, errorThrown) {
-//         var response = JSON.parse(jqXHR.responseText);
-//         $("#error").html("Error: " + response.message);
-//         $("#error").show();
-//       }
-//     });
-//   }
-//
-//   // Device is signaling and will be stopped
-//   else {
-//     $.ajax({
-//       url: '/devices/signal',
-//       type: 'POST',
-//       headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//       data: { 'deviceId': deviceId, 'signalCode': 0 },
-//       responseType: 'json',
-//       success: function (data, textStatus, jqXHR) {
-//         let response = JSON.parse(jqXHR.responseText);
-//         $("#signal-" + deviceId + "-message").html(response.message);
-//
-//         // Took me a while to figure out that innerHTML does not work with JQuery >:)
-//         document.getElementById("signal-" + deviceId).innerText = "SIGNAL";
-//       },
-//       error: function(jqXHR, textStatus, errorThrown) {
-//         var response = JSON.parse(jqXHR.responseText);
-//         $("#error").html("Error: " + response.message);
-//         $("#error").show();
-//       }
-//     });
-//   }
-// }
-//
-// // Updates the full name on both the database and the front-end
-// function updateName() {
-//   $.ajax({
-//     url: '/users/updateName',
-//     method: 'POST',
-//     headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//     contentType: 'application/json',
-//     data: JSON.stringify({ 'fullName': $("#updateFullName").val() }),
-//     dataType: 'json'
-//    })
-//      .done(function (data, textStatus, jqXHR) {
-//
-//        // Name was changed successfully and will be updated in account.html
-//        if(data.success == true) {
-//          hideUpdateNameForm();
-//
-//          // Front-end will be updated and message shown for 10 seconds
-//          $('#fullName').html($("#updateFullName").val());
-//          $("#messagesUser").html(data.message);
-//          $("#messagesUser").show();
-//         setTimeout(function(){ $("#messagesUser").hide(); }, 10000);
-//
-//        }
-//      })
-//      .fail(function(jqXHR, textStatus, errorThrown) {
-//        let response = JSON.parse(jqXHR.responseText);
-//        $("#error").html("Error: " + response.message);
-//        $("#error").show();
-//      });
-// }
-//
-// // Updates the full name on both the database and the front-end
-// function updatePassword() {
-//   let password = $("#newPassword");
-//   let passwordConfirm = $("#confirmNewPassword");
-//   let validPassword = true;
-//   let validConfirmPassword = true;
-//
-//   // Create regular expression for password format
-//   let passwordRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,20}$/;
-//
-//   // Clear the contents of the error div every time form is submited
-//   $("#passwordErrorsList").html("");
-//
-//   // Testing password validness `
-//   if (passwordRegEx.test(password.val())) {
-//     // Remove the error class, in case it was previously added.
-//     $("#newPasswordLabel").removeClass("errorClass");
-//     validPassword = true;
-//   }
-//
-//   // When password input has an error
-//   else {
-//     // Add the error class, which defines a bold red font
-//     $("#newPasswordLabel").addClass("errorClass");
-//
-//     if (password.val().length < 10 || password.val().length > 20) {
-//       // Create a <li> node
-//       let node = document.createElement("li");
-//       // Create a text node
-//       let textnode = document.createTextNode("Password must be between 10 and 20 characters.");
-//       // Append the text to <li>
-//       node.appendChild(textnode);
-//       // Append <li> to <ul> with id="errors"
-//       document.getElementById("passwordErrorsList").appendChild(node);
-//     }
-//
-//     let validLower = false;
-//     let validUpper = false;
-//     let validDigit = false;
-//
-//     for (let index = 0; index < password.val().length; index++) {
-//       let char = password.val()[index];
-//
-//       // Testing for lowercase letter
-//       if (char == char.toLowerCase() && isNaN(char)) {
-//         validLower = true;
-//       }
-//
-//       // Testing for uppercase letter
-//       if (char == char.toUpperCase() && isNaN(char)) {
-//         validUpper = true;
-//       }
-//
-//       // Testing for digit
-//       if (!isNaN(char)) {
-//         validDigit = true;
-//       }
-//     }
-//
-//     if (validLower == false) {
-//       // Create a <li> node
-//       let node = document.createElement("li");
-//       // Create a text node
-//       let textnode = document.createTextNode("Password must contain at least one lowercase character.");
-//       // Append the text to <li>
-//       node.appendChild(textnode);
-//       // Append <li> to <ul> with id="errors"
-//       document.getElementById("passwordErrorsList").appendChild(node);
-//     }
-//
-//     if (validUpper == false) {
-//       // Create a <li> node
-//       let node = document.createElement("li");
-//       // Create a text node
-//       let textnode = document.createTextNode("Password must contain at least one uppercase character.");
-//       // Append the text to <li>
-//       node.appendChild(textnode);
-//       // Append <li> to <ul> with id="errors"
-//       document.getElementById("passwordErrorsList").appendChild(node);
-//     }
-//
-//     if (validDigit == false) {
-//       // Create a <li> node
-//       let node = document.createElement("li");
-//       // Create a text node
-//       let textnode = document.createTextNode("Password must contain at least one digit.");
-//       // Append the text to <li>
-//       node.appendChild(textnode);
-//       // Append <li> to <ul> with id="errors"
-//       document.getElementById("passwordErrorsList").appendChild(node);
-//     }
-//     validPassword = false;
-//   }
-//
-//   if (password.val() == passwordConfirm.val()) {
-//     // Remove the error class, in case it was previously added.
-//     $("#confirmNewPasswordLabel").removeClass("errorClass");
-//     validConfirmPassword = true;
-//   }
-//
-//   else {
-//       // Add the error class, which defines a 2px red border
-//       $("#confirmNewPasswordLabel").addClass("errorClass");
-//       // Create a <li> node
-//       let node = document.createElement("li");
-//       // Create a text node
-//       let textnode = document.createTextNode("Passwords do not match.");
-//       // Append the text to <li>
-//       node.appendChild(textnode);
-//       // Append <li> to <ul> with id="errors"
-//       document.getElementById("passwordErrorsList").appendChild(node);
-//       validConfirmPassword = false;
-//     }
-//
-//   if (validPassword == false || validConfirmPassword == false) {
-//     // Make the formErrors div visible
-//     $("#passwordErrors").show();
-//   }
-//
-//   else {
-//     $("#passwordErrors").hide();
-//
-//     $.ajax({
-//       url: '/users/updatePassword',
-//       method: 'POST',
-//       headers: { 'x-auth': window.localStorage.getItem("authToken") },
-//       contentType: 'application/json',
-//       data: JSON.stringify({ 'newPassword': password.val() }),
-//       dataType: 'json'
-//      })
-//        .done(function (data, textStatus, jqXHR) {
-//
-//          // Password was changed successfully and will be updated in account.html
-//          if(data.success == true) {
-//            hideUpdatePasswordForm();
-//
-//            // Front-end will be updated and message shown for 10 seconds
-//            $("#messagesUser").html(data.message);
-//            $("#messagesUser").show();
-//           setTimeout(function(){ $("#messagesUser").hide(); }, 10000);
-//          }
-//        })
-//        .fail(function(jqXHR, textStatus, errorThrown) {
-//          let response = JSON.parse(jqXHR.responseText);
-//          $("#error").html("Error: " + response.message);
-//          $("#error").show();
-//        });
-//
-//   }
-// }
-//
-// // Show update name form and hide the update name button (really a link)
-// function showUpdateNameForm() {
-//   $("#updateFullName").val("");       // Clear the input for full name
-//   $("#updateNameControl").hide();     // Hide the update name link
-//   $("#updateNameForm").slideDown();   // Show the update name form
-// }
-//
-// // Hides the update name form and shows the update name button (link)
-// function hideUpdateNameForm() {
-//   $("#updateNameControl").show();     // Show the update name link
-//   $("#updateNameForm").slideUp();     // Hide the update name form
-//   $("#error").hide();
-// }
-//
-// // Show update password form and hide the update password button (really a link)
-// function showUpdatePasswordForm() {
-//   $("#newPassword").val("");                                // Clear the input for new password
-//   $("#confirmNewPassword").val("");                         // Clear the input for confirm new password
-//   $("#updatePasswordControl").hide();                       // Hide the update password link
-//   $("#updatePasswordForm").slideDown();                     // Show the update password form
-// }
-//
-// // Hides the update password form and shows the update password button (link)
-// function hideUpdatePasswordForm() {
-//   $("#updatePasswordControl").show();                       // Show the update password link
-//   $("#updatePasswordForm").slideUp();                       // Hide the update password form
-//   $("#passwordErrors").hide();                              // Remove error div
-//   $("#confirmNewPasswordLabel").removeClass("errorClass");  // Remove error class from label
-//   $("#newPasswordLabel").removeClass("errorClass");  // Remove error class from label
-//   $("#error").hide();
-// }
-//
-// // Show add device form and hide the add device button (really a link)
-// function showAddDeviceForm() {
-//   $("#addDeviceId").val("");          // Clear the input for the device ID
-//   $("#addDeviceControl").hide();      // Hide the add device link
-//   $("#addDeviceForm").slideDown();    // Show the add device form
-// }
-//
-// // Hides the add device form and shows the add device button (link)
-// function hideAddDeviceForm() {
-//   $("#addDeviceControl").show();   // Show the add device link
-//   $("#addDeviceForm").slideUp();   // Hide the add device form
-//   $("#error").hide();
-// }
-//
-// // Show remove device form and hide the remove device button (really a link)
-// function showDeleteDeviceForm() {
-//   $("#deleteDeviceId").val("");       // Clear the input for the device ID
-//   $("#deleteDeviceControl").hide();   // Hide the remove device link
-//   $("#deleteDeviceForm").slideDown(); // Show the remove device form
-// }
-//
-// // Hides the remove device form and shows the remove device button (link)
-// function hideDeleteDeviceForm() {
-//   $("#deleteDeviceControl").show();   // Show the remove device link
-//   $("#deleteDeviceForm").slideUp();   // Hide the remove device form
-//   $("#error").hide();
-// }
-//
-// $(function() {
-//
-//   // Check if there is an authToken before sending request. If missing, redirect to signin.html
-//   if (!window.localStorage.getItem("authToken")) {
-//     window.location.replace("signin.html");
-//   }
-//
-//   else {
-//     // Send request for account information since authToken exists
-//     sendAccountRequest();
-//
-//     // Create a timer that will update the front end after each interval
-//     let intervalID = setInterval(updateData, 10000);
-//   }
-//
-//   // Updates the data on the front-end
-//   function updateData() {
-//     $.ajax({
-//       url: '/users/account',
-//       method: 'GET',
-//       headers: { 'x-auth' : window.localStorage.getItem("authToken") },
-//       dataType: 'json'
-//     })
-//     .done(function (data, textStatus, jqXHR) {
-//       // Update data table
-//       let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
-//
-//       for (let reading of data.readings) {
-//         let date = getDate(new Date(reading.date));
-//         let time = getTime(new Date(reading.date));
-//
-//         str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
-//         "</td><td>" + reading.averageSPO2 + "</td></tr>"
-//       }
-//       $("#addDataTable").html(str + "</table>");
-//
-//       // Alert that it's time for new reading
-//       if(data.alertFlag == 'true') {
-//         console.log("Time to take a reading. Click 'Close' to continue" + data.alertFlag);
-//       }
-//     })
-//     .fail(function(jqXHR, textStatus, errorThrown) {
-//       let response = JSON.parse(jqXHR.responseText);
-//       $("#error").html("Error: " + response.message);
-//       $("#error").show();
-//     });
-//   }
-//
-//   // Register event listeners
-//   $("#updateNameLink").click(showUpdateNameForm);
-//   $("#updateName").click(updateName);
-//   $("#cancelUpdateName").click(hideUpdateNameForm);
-//
-//   $("#updatePasswordLink").click(showUpdatePasswordForm);
-//   $("#updatePassword").click(updatePassword);
-//   $("#cancelUpdatePassword").click(hideUpdatePasswordForm);
-//
-//   $("#addDeviceLink").click(showAddDeviceForm);
-//   $("#registerDevice").click(registerDevice);
-//   $("#cancelRegister").click(hideAddDeviceForm);
-//
-//   $("#deleteDeviceLink").click(showDeleteDeviceForm);
-//   $("#removeDevice").click(removeDevice);
-//   $("#cancelDelete").click(hideDeleteDeviceForm);
-// });
-//
-//
-// function getDate(utcDate) {
-//   let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-//   let date = new Intl.DateTimeFormat('en-US', options).format(utcDate);
-//   return date;
-// }
-//
-// function getTime(utcDate) {
-//   options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-//   let time = new Intl.DateTimeFormat('en-US', options).format(utcDate);
-//   return time;
-// }
+// Check if there is an authToken before sending request. If missing, redirect to signin.html
+if (!window.localStorage.getItem('authToken')) {
+  window.location.replace('signin.html');
+}
+
+function getReadingsData() {
+  $.ajax({
+    url: '/users/readings',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+    .done(function (data, textStatus, jqXHR) {
+
+      // No data has been collected at all, display message to alert user
+      if (Object.keys(data.readings).length == 0) {
+        $("#messagesDaySummary").html("No data has been collected.");
+        $("#messagesDaySummary").show();
+        $("#messagesAllData").html("No data has been collected.");
+        $("#messagesAllData").show();
+        return;
+      }
+
+      else {
+        $("#messagesDaySummary").hide();
+      }
+
+      // Setting up the datepicker options
+      let options = {};
+      options['maxDate'] = new Date(data.readings[0].date);
+      options['minDate'] = new Date(data.readings[data.readings.length - 1].date);
+      options['showMonthAfterYear'] = true;
+
+      // String that will become data table's html
+      let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+
+      // Sets up the datepicker calendar
+      $('.datepicker').datepicker(options);
+
+      // Global font size for Charts
+      Chart.defaults.global.defaultFontSize = 18;
+
+      // Get date of latest readings and calculate the past week from there
+      let initDay = getDateLong(new Date(data.readings[0].date));
+      let finDay = getDateLong(new Date(new Date().setDate(new Date(data.readings[0].date).getDate() - 7)));
+      let labels = [];
+
+      // Get average data for heart rate and SPO2
+      let dataObj = {};
+      let dataHeartRateChart = [];
+      let dataSPO2Chart = [];
+      let currentDateIteration;
+
+
+      // Finding which dates will be included (have data collected)
+      for (var i = 0; i < 7; i++) {
+        // Set the hours to zero for comparing reasons
+        currentDateIteration = new Date(new Date().setDate(new Date(data.readings[0].date).getDate() - i));
+        currentDateIteration.setHours(0,0,0,0);
+
+        dataObj[getDateShort(currentDateIteration)] = {};
+        dataObj[getDateShort(currentDateIteration)].date = currentDateIteration;
+        dataObj[getDateShort(currentDateIteration)]["averageHeartRate"] = []
+        dataObj[getDateShort(currentDateIteration)]["averageSPO2"] = [];
+
+        for(let reading of data.readings) {
+
+          // Populate table's string
+          let date = getDate(new Date(reading.date));
+          let time = getTime(new Date(reading.date));
+
+          str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
+          "</td><td>" + reading.averageSPO2 + "</td></tr>"
+
+          // Change hours to zero for comparing reasons
+          let day = new Date(reading.date);
+          day.setHours(0,0,0,0);
+
+          if(day.valueOf() == currentDateIteration.valueOf()) {
+            dataObj[getDateShort(currentDateIteration)]["averageHeartRate"].push(reading.averageHeartRate);
+            dataObj[getDateShort(currentDateIteration)]["averageSPO2"].push(reading.averageSPO2);
+          }
+        }
+
+        $("#addDataTable").html(str + "</table>");
+
+        // Remove the object for day if no data present and add a flag to labels to remove it aswell
+        if(dataObj[getDateShort(currentDateIteration)]["averageHeartRate"].length == 0) {
+          delete dataObj[getDateShort(currentDateIteration)];
+        }
+
+        // No data recorded in the past 7 days
+        if(Object.keys(dataObj).length == 0) {
+          $("#messagesWeeklySummary").html("No data collected in the past 7 days.");
+          $("#messagesWeeklySummary").show();
+          return;
+        }
+
+        else {
+          $("#messagesWeeklySummary").hide();
+        }
+      }
+
+      // Populating the labels array and the dataHeartRateChart and dataSPO2Chart array
+      for(let i = 0; i < Object.keys(dataObj).length; i++) {
+        labels[i] = Object.keys(dataObj)[i].valueOf();
+        dataHeartRateChart[i] = 0;
+        dataSPO2Chart[i] = 0;
+
+        for (let j = 0; j < dataObj[Object.keys(dataObj)[i].valueOf()]["averageHeartRate"].length; j++) {
+          dataHeartRateChart[i] += parseFloat(dataObj[Object.keys(dataObj)[i].valueOf()]["averageHeartRate"][j]);
+        }
+
+        for (let j = 0; j < dataObj[Object.keys(dataObj)[i].valueOf()]["averageSPO2"].length; j++) {
+          dataSPO2Chart[i] += parseFloat(dataObj[Object.keys(dataObj)[i].valueOf()]["averageSPO2"][j]);
+        }
+
+        // These arrays contain all the averages (finally)
+        dataHeartRateChart[i] = Math.round(dataHeartRateChart[i] / dataObj[Object.keys(dataObj)[i].valueOf()]["averageHeartRate"].length);
+        dataSPO2Chart[i] = Math.round(dataSPO2Chart[i] / dataObj[Object.keys(dataObj)[i].valueOf()]["averageSPO2"].length);
+      }
+
+      // Add the labels for min, max and avg
+      labels[labels.length] = "Week's Min";
+      labels[labels.length] = "Week's Max";
+      labels[labels.length] = "Week's Avg";
+
+      // Push values for min, max and avg to data arrays
+      let average = (array) => array.reduce((a, b) => a + b) / array.length;
+      dataHeartRateChart[dataHeartRateChart.length] = Math.min.apply(Math, dataHeartRateChart);
+      dataHeartRateChart[dataHeartRateChart.length] = Math.max.apply(Math, dataHeartRateChart);
+      dataHeartRateChart[dataHeartRateChart.length] = Math.round(average(dataHeartRateChart));
+
+      dataSPO2Chart[dataSPO2Chart.length] = Math.min.apply(Math, dataSPO2Chart);
+      dataSPO2Chart[dataSPO2Chart.length] = Math.max.apply(Math, dataSPO2Chart);
+      dataSPO2Chart[dataSPO2Chart.length] = Math.round(average(dataSPO2Chart));
+
+      // Heart rate weekly summary chart
+      let weeklySummaryChartHeartRateTag = $('#weeklySummaryChartHeartRateTag')[0].getContext('2d');
+      let titleHeartRate = 'Average Heart Rate :   ' + initDay + "   -   " +  finDay;
+      let optionsHeartRate = {
+        legend: {
+            display: false
+        },
+        scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Beats Per Minute'
+            },
+            ticks: {
+              min: (Math.ceil((Math.min.apply(Math, dataHeartRateChart)) / 2) * 2) - 2,
+              max: (Math.ceil((Math.max.apply(Math, dataHeartRateChart)) / 2) * 2) + 2
+            }
+          }],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Date'
+            }
+          }]
+        },
+        title: {
+          display: true,
+          text: titleHeartRate,
+          fontSize: 24,
+          fontFamily: '-apple-system ,BlinkMacSystemFont, Roboto, Oxygen-Sans, sans-serif'
+        }
+      };
+
+      let dataHeartRate = {
+        labels: labels,
+        datasets: [{
+          label: 'Average Heart Rate',
+          data: dataHeartRateChart,
+          backgroundColor: 'rgba(255, 99, 132, 0.4)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1.5
+        }]
+      };
+
+      // SPO2 weekly summary chart
+      let weeklySummaryChartSPO2Tag = $('#weeklySummaryChartSPO2Tag')[0].getContext('2d');
+      let titleSPO2 = 'Average SPO2 :   ' + initDay + "   -   " +  finDay;
+      let optionsSPO2 = {
+        legend: {
+            display: false
+        },
+        scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Percentage'
+            },
+            ticks: {
+              min: (Math.ceil((Math.min.apply(Math, dataSPO2Chart)) / 2) * 2) - 2,
+              max: (Math.ceil((Math.max.apply(Math, dataSPO2Chart)) / 2) * 2) + 2
+            }
+          }],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Date'
+            }
+          }]
+        },
+        title: {
+          display: true,
+          text: titleSPO2,
+          fontSize: 24,
+          fontFamily: '-apple-system ,BlinkMacSystemFont, Roboto, Oxygen-Sans, sans-serif'
+        }
+      };
+
+      let dataSPO2 = {
+        labels: labels,
+        datasets: [{
+          label: 'Average SPO2',
+          data: dataSPO2Chart,
+          backgroundColor: 'rgba(54, 162, 235, 0.3)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1.5
+        }]
+      };
+
+      // Initializing the charts
+      let weeklySummaryChartHeartRate = new Chart(weeklySummaryChartHeartRateTag, {
+        type: 'bar',
+        data: dataHeartRate,
+        options: optionsHeartRate
+      });
+
+      let weeklySummaryChartSPO2 = new Chart(weeklySummaryChartSPO2Tag, {
+        type: 'bar',
+        data: dataSPO2,
+        options: optionsSPO2
+      });
+
+      // Button to show and hide weekly summary charts
+      $('#viewWeeklySummaryControl').click(showHideWeeklySummaryCharts);
+
+      // Update data table
+      if (Object.keys(data.readings).length != 0) {
+        $("#data").show();
+
+        // Update data table
+        let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+
+        for (let reading of data.readings) {
+          let date = getDate(new Date(reading.date));
+          let time = getTime(new Date(reading.date));
+
+          str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
+          "</td><td>" + reading.averageSPO2 + "</td></tr>"
+        }
+          $("#addDataTable").html(str + "</table>");
+      }
+
+      else {
+        $("#addDataTable").html("No data has been collected");
+      }
+
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      let response = JSON.parse(jqXHR.responseText);
+      $("#error").html("Error: " + response.message);
+      $("#error").show();
+    });
+}
+
+// Show or hide weekly summary charts function
+function showHideWeeklySummaryCharts() {
+
+  if ($('#viewWeeklySummaryControl').html() == "View Weekly Summary") {
+    $('#viewWeeklySummaryControl').html("Hide Weekly Summary");
+    $('#weeklyChartHeartRate').show();
+    $('#weeklyChartSPO2').show();
+  }
+
+  else {
+    $('#viewWeeklySummaryControl').html("View Weekly Summary");
+    $('#weeklyChartHeartRate').hide();
+    $('#weeklyChartSPO2').hide();
+  }
+}
+
+// Show or hide day summary charts function
+function showHideDaySummaryCharts() {
+
+  if ($('#viewDaySummaryControl').html() == "Hide Day Summary") {
+    $('#viewDaySummaryControl').html("Show Day Summary");
+    $('#dayChartHeartRate').hide();
+    $('#dayChartSPO2').hide();
+  }
+
+  else {
+    $('#viewDaySummaryControl').html("Hide Day Summary");
+    $('#dayChartHeartRate').show();
+    $('#dayChartSPO2').show();
+  }
+}
+
+function getDateLong(utcDate) {
+  let options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+  let date = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+  return date;
+}
+
+function getDateShort(utcDate) {
+  let options = { weekday: 'short', day: 'numeric' };
+  let date = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+  return date;
+}
+
+function getDate(utcDate) {
+  let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  let date = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+  return date;
+}
+
+function getTime(utcDate) {
+  options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+  let time = new Intl.DateTimeFormat('en-US', options).format(utcDate);
+  return time;
+}
+
+$(function() {
+  // Send request for readings data
+  getReadingsData();
+
+  // Copying values of divs that change throughout interaction so that they can comeback to original state
+  let htmlCanvasHeartRate = $('#dayChartHeartRate').html();
+  let htmlCanvasSPO2 = $('#dayChartSPO2').html();
+  let htmlDaySummaryControl = $('#viewDaySummaryControlDiv').html();
+
+  $('#dateSubmission').click(function() {
+
+    // Clear the contents of the error and canvas divs every time form is submited
+    $("#dayChartErrorsList").html("");
+    $('#dayChartHeartRate').html(htmlCanvasHeartRate)
+    $('#dayChartSPO2').html(htmlCanvasSPO2);
+    $('#viewDaySummaryControlDiv').html(htmlDaySummaryControl);
+    $("#messagesDaySummary").hide();
+    $('#viewDaySummaryControlDiv').hide();
+    $('#dayChartHeartRate').hide();
+    $('#dayChartSPO2').hide();
+
+    // Empty form is submitted
+    if($('#dateSelected').val() == "") {
+      $("#selectDayLabel").addClass("errorClass");
+      let node = document.createElement("li");
+      let textnode = document.createTextNode("A date must be selected.")
+      node.appendChild(textnode);
+      document.getElementById("dayChartErrorsList").appendChild(node);
+      $("#dayChartErrors").show();
+      return;
+    }
+
+    // Remove error class
+    else {
+      $("#selectDayLabel").removeClass("errorClass");
+      $("#dayChartErrors").hide();
+    }
+
+    $.ajax({
+      url: '/users/readings',
+      method: 'GET',
+      headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+      dataType: 'json'
+    })
+      .done(function (data, textStatus, jqXHR) {
+
+        // When no data has been collected for user
+        if (Object.keys(data.readings).length == 0) {
+          $("#selectDayLabel").addClass("errorClass");
+          let node = document.createElement("li");
+          let textnode = document.createTextNode("No data has been collected.")
+          node.appendChild(textnode);
+          document.getElementById("dayChartErrorsList").appendChild(node);
+          $("#dayChartErrors").show();
+          return;
+        }
+
+        // Global font size for Charts
+        Chart.defaults.global.defaultFontSize = 18;
+
+        // Get average data for heart rate and SPO2
+        let labels = [];
+        let dataObj = {};
+        let dataHeartRateChart = [];
+        let dataSPO2Chart = [];
+        let currentDateIteration;
+        let date = new Date($('#dateSelected').val());
+
+        dataObj[getDateShort(date)] = {};
+        dataObj[getDateShort(date)]["averageHeartRate"] = []
+        dataObj[getDateShort(date)]["averageSPO2"] = [];
+        dataObj[getDateShort(date)]["time"] = [];
+
+        // Find the date selected in database
+        for(let reading of data.readings) {
+          let day = new Date(reading.date);
+          day.setHours(0,0,0,0);
+
+          // Add values to dataObj
+          if(day.valueOf() == date.valueOf()) {
+            dataObj[getDateShort(date)]["averageHeartRate"].push(parseFloat(reading.averageHeartRate));
+            dataObj[getDateShort(date)]["averageSPO2"].push(parseFloat(reading.averageSPO2));
+            day = new Date(reading.date);
+            let time = day.getHours();
+
+            // Making the time pretty for the labels in the graphs
+            if(day.getMinutes() < 10) {
+              time += ":0" + day.getMinutes();
+            }
+
+            else {
+              time += ":" + day.getMinutes();
+            }
+            dataObj[getDateShort(date)]["time"].push(time);
+          }
+        }
+
+        // No data has been collected for selected date
+        if(dataObj[getDateShort(date)].averageHeartRate.length == 0 ) {
+          $("#messagesDaySummary").html("No data collected for selected date.");
+          $("#messagesDaySummary").show();
+
+          setTimeout(function() {
+            $("#messagesDaySummary").hide();
+          }, 10000);
+          return;
+        }
+
+        else {
+          $('#viewDaySummaryControl').show();
+        }
+
+        // Populating the labels array and the dataHeartRateChart and dataSPO2Chart array
+        for(let i = 0; i < dataObj[getDateShort(date)]["time"].length; i++) {
+          labels[i] = dataObj[getDateShort(date)]["time"][i];
+          dataHeartRateChart[i] = dataObj[getDateShort(date)]["averageHeartRate"][i];
+          dataSPO2Chart[i] = dataObj[getDateShort(date)]["averageSPO2"][i];
+        }
+
+        // Add the labels for min, max and avg
+        labels[labels.length] = "Day's Min";
+        labels[labels.length] = "Day's Max";
+        labels[labels.length] = "Day's Avg";
+
+        // Push values for min, max and avg to data arrays
+        let average = (array) => array.reduce((a, b) => a + b) / array.length;
+        dataHeartRateChart[dataHeartRateChart.length] = Math.min.apply(Math, dataHeartRateChart);
+        dataHeartRateChart[dataHeartRateChart.length] = Math.max.apply(Math, dataHeartRateChart);
+        dataHeartRateChart[dataHeartRateChart.length] = Math.round(average(dataHeartRateChart));
+
+        dataSPO2Chart[dataSPO2Chart.length] = Math.min.apply(Math, dataSPO2Chart);
+        dataSPO2Chart[dataSPO2Chart.length] = Math.max.apply(Math, dataSPO2Chart);
+        dataSPO2Chart[dataSPO2Chart.length] = Math.round(average(dataSPO2Chart));
+
+        // Heart rate for day' summary chart
+        let daySummaryChartHeartRateTag = $('#daySummaryChartHeartRateTag')[0].getContext('2d');
+        let titleHeartRate = 'Heart Rate :   ' + getDateLong(date);
+        let optionsHeartRate = {
+          legend: {
+              display: false
+          },
+          scales: {
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Beats Per Minute'
+              },
+              ticks: {
+                min: (Math.ceil((Math.min.apply(Math, dataHeartRateChart)) / 2) * 2) - 2,
+                max: (Math.ceil((Math.max.apply(Math, dataHeartRateChart)) / 2) * 2) + 2
+              }
+            }],
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Time of Day'
+              }
+            }]
+          },
+          title: {
+            display: true,
+            text: titleHeartRate,
+            fontSize: 24,
+            fontFamily: '-apple-system ,BlinkMacSystemFont, Roboto, Oxygen-Sans, sans-serif'
+          }
+        };
+
+        let dataHeartRate = {
+          labels: labels,
+          datasets: [{
+            label: 'Heart Rate',
+            data: dataHeartRateChart,
+            backgroundColor: 'rgba(255, 99, 132, 0.4)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1.5
+          }]
+        };
+
+        // SPO2 weekly summary chart
+        let daySummaryChartSPO2Tag = $('#daySummaryChartSPO2Tag')[0].getContext('2d');
+        let titleSPO2 = 'SPO2 :   ' + getDateLong(date);
+        let optionsSPO2 = {
+          legend: {
+              display: false
+          },
+          scales: {
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Percentage'
+              },
+              ticks: {
+                min: (Math.ceil((Math.min.apply(Math, dataSPO2Chart)) / 2) * 2) - 2,
+                max: (Math.ceil((Math.max.apply(Math, dataSPO2Chart)) / 2) * 2) + 2
+              }
+            }],
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Time of Day'
+              }
+            }]
+          },
+          title: {
+            display: true,
+            text: titleSPO2,
+            fontSize: 24,
+            fontFamily: '-apple-system ,BlinkMacSystemFont, Roboto, Oxygen-Sans, sans-serif'
+          }
+        };
+
+        let dataSPO2 = {
+          labels: labels,
+          datasets: [{
+            label: 'SPO2',
+            data: dataSPO2Chart,
+            backgroundColor: 'rgba(54, 162, 235, 0.3)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1.5
+          }]
+        };
+
+        // Initializing the charts
+        let daySummaryChartHeartRate = new Chart(daySummaryChartHeartRateTag, {
+          type: 'bar',
+          data: dataHeartRate,
+          options: optionsHeartRate
+        });
+
+        let daySummaryChartSPO2 = new Chart(daySummaryChartSPO2Tag, {
+          type: 'bar',
+          data: dataSPO2,
+          options: optionsSPO2
+        });
+
+        // Show day charts
+        $('#dayChartHeartRate').show();
+        $('#dayChartSPO2').show();
+        $('#viewDaySummaryControlDiv').show();
+
+        // Button to show and hide weekly summary charts
+        $('#viewDaySummaryControl').click(showHideDaySummaryCharts);
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        let response = JSON.parse(jqXHR.responseText);
+        $("#error").html("Error: " + response.message);
+        $("#error").show();
+      });
+  });
+});

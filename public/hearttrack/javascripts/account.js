@@ -44,19 +44,75 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
     $("#data").hide();
   }
 
-  // Populating data passed from
+  // Populating data passed from database, only showing the last 5 readings
   else {
+    $("#data").show();
     let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+    let numRecentReadings = 4;
+    let currReading = 0;
 
     for (let reading of data.readings) {
       let date = getDate(new Date(reading.date));
       let time = getTime(new Date(reading.date));
 
       str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
-      "</td><td>" + reading.averageSPO2 + "</td></tr>"
+      "</td><td>" + reading.averageSPO2 + "</td></tr>";
+
+      currReading++;
+
+      // Stop after 5 readings
+      if(currReading >= numRecentReadings) {
+        break;
+      }
     }
     $("#addDataTable").html(str + "</table>");
   }
+}
+
+// Updates the data on the front-end
+function updateData() {
+  $.ajax({
+    url: '/users/readings',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+  .done(function (data, textStatus, jqXHR) {
+
+    // Case where data is stored immediately after registration
+    if (Object.keys(data.readings).length != 0) {
+      $("#data").show();
+      let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+      let numRecentReadings = 4;
+      let currReading = 0;
+
+      for (let reading of data.readings) {
+        let date = getDate(new Date(reading.date));
+        let time = getTime(new Date(reading.date));
+
+        str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
+        "</td><td>" + reading.averageSPO2 + "</td></tr>";
+
+        currReading++;
+
+        // Stop after 5 readings
+        if(currReading >= numRecentReadings) {
+          break;
+        }
+      }
+      $("#addDataTable").html(str + "</table>");
+    }
+
+    // Alert that it's time for new reading
+    if(data.alertFlag == 'true') {
+      console.log("Time to take a reading. Click 'Close' to continue" + data.alertFlag);
+    }
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    let response = JSON.parse(jqXHR.responseText);
+    $("#error").html("Error: " + response.message);
+    $("#error").show();
+  });
 }
 
 // Case where ajax GET request failed
@@ -77,58 +133,99 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
 
 // Registers the specified device with the server.
 function registerDevice() {
-  $.ajax({
-    url: '/devices/register',
-    method: 'POST',
-    headers: { 'x-auth': window.localStorage.getItem("authToken") },
-    contentType: 'application/json',
-    data: JSON.stringify({ deviceId: $("#addDeviceId").val() }),
-    dataType: 'json'
-   })
-     .done(function (data, textStatus, jqXHR) {
-       // Add new device to the device list
-       $("#addDeviceForm").before("<li class='collection-item' id='device-" + data["deviceId"] + "'>ID: " +
-       $("#addDeviceId").val() + "<br>APIKEY: " + data["apiKey"] + "<br><button id='ping-" + data["deviceId"] +
-        "' class='waves-effect waves-light btn'>Ping</button> " +
-        "<span id='ping-" + data["deviceId"] + "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
-        "' class='waves-effect waves-light btn'>Signal</button> " +
-        "<span id='signal-" + data["deviceId"] + "-message'></span>" + "</li>");
+  // Clear the contents of the error div every time form is submited
+  $("#deviceErrorsList").html("");
 
-        $("#ping-" + data["deviceId"]).click(function(event) {
-           pingDevice(event, data["deviceId"]);
-        });
+  // Empty form is submitted
+  if($("#addDeviceId").val() == "") {
+    $("#addDeviceIdLabel").addClass("errorClass");
+    let node = document.createElement("li");
+    let textnode = document.createTextNode("Enter a Device ID to register.")
+    node.appendChild(textnode);
+    document.getElementById("deviceErrorsList").appendChild(node);
+    $("#deviceErrors").show();
+  }
 
-        $("#signal-" + data["deviceId"]).click(function(event) {
-           signalDevice(event, data["deviceId"]);
-        });
+  else {
+    // Remove error class
+    $("#addDeviceIdLabel").removeClass("errorClass");
 
-        $("#messagesDevice").html(data.message);
-        hideAddDeviceForm();
-        $("#messagesDevice").css('color', '#26a69a');
-        $("#messagesDevice").show();
-        setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
+    $.ajax({
+      url: '/devices/register',
+      method: 'POST',
+      headers: { 'x-auth': window.localStorage.getItem("authToken") },
+      contentType: 'application/json',
+      data: JSON.stringify({ deviceId: $("#addDeviceId").val() }),
+      dataType: 'json'
      })
-     .fail(function(jqXHR, textStatus, errorThrown) {
-       let response = JSON.parse(jqXHR.responseText);
-       hideAddDeviceForm();
-       $("#messagesDevice").html(response.message);
-       $("#messagesDevice").css('color', 'red');
-       $("#messagesDevice").show();
-       setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-     });
+       .done(function (data, textStatus, jqXHR) {
+         // Add new device to the device list
+         $("#addDeviceForm").before("<li class='collection-item' id='device-" + data["deviceId"] + "'>ID: " +
+         $("#addDeviceId").val() + "<br>APIKEY: " + data["apiKey"] + "<br><button id='ping-" + data["deviceId"] +
+          "' class='waves-effect waves-light btn'>Ping</button> " +
+          "<span id='ping-" + data["deviceId"] + "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
+          "' class='waves-effect waves-light btn'>Signal</button> " +
+          "<span id='signal-" + data["deviceId"] + "-message'></span>" + "</li>");
+
+          $("#ping-" + data["deviceId"]).click(function(event) {
+             pingDevice(event, data["deviceId"]);
+          });
+
+          $("#signal-" + data["deviceId"]).click(function(event) {
+             signalDevice(event, data["deviceId"]);
+          });
+
+          $("#messagesDevice").html(data.message);
+          hideAddDeviceForm();
+          $("#messagesDevice").css('color', '#26a69a');
+          $("#messagesDevice").show();
+
+          setTimeout(function() {
+            $("#messagesDevice").hide();
+          }, 10000);
+       })
+       .fail(function(jqXHR, textStatus, errorThrown) {
+         $("#addDeviceIdLabel").addClass("errorClass");
+         let response = JSON.parse(jqXHR.responseText);
+         $("#messagesDevice").html(response.message);
+         $("#messagesDevice").css('color', 'red');
+         $("#messagesDevice").show();
+
+         setTimeout(function(){
+           $("#messagesDevice").hide();
+         }, 10000);
+       });
+  }
 }
 
 // Removes the specified device from the server.
 function removeDevice() {
-  $.ajax({
-    url: '/devices/remove',
-    method: 'POST',
-    headers: { 'x-auth': window.localStorage.getItem("authToken") },
-    contentType: 'application/json',
-    data: JSON.stringify({ 'deviceId': $("#deleteDeviceId").val() }),
-    dataType: 'json'
-   })
-     .done(function (data, textStatus, jqXHR) {
+  // Clear the contents of the error div every time form is submited
+  $("#deviceErrorsList").html("");
+
+  // Empty form is submitted
+  if($("#deleteDeviceId").val() == "") {
+    $("#deleteDeviceIdLabel").addClass("errorClass");
+    let node = document.createElement("li");
+    let textnode = document.createTextNode("Enter a Device ID to remove.")
+    node.appendChild(textnode);
+    document.getElementById("deviceErrorsList").appendChild(node);
+    $("#deviceErrors").show();
+  }
+
+  else {
+    // Remove error class
+    $("#deleteDeviceIdLabel").removeClass("errorClass");
+
+    $.ajax({
+      url: '/devices/remove',
+      method: 'POST',
+      headers: { 'x-auth': window.localStorage.getItem("authToken") },
+      contentType: 'application/json',
+      data: JSON.stringify({ 'deviceId': $("#deleteDeviceId").val() }),
+      dataType: 'json'
+     })
+      .done(function (data, textStatus, jqXHR) {
        let response = JSON.parse(jqXHR.responseText);
        // Remove device from the device list
        $("#device-" + $("#deleteDeviceId").val()).remove();
@@ -136,16 +233,23 @@ function removeDevice() {
        $("#messagesDevice").css('color', '#26a69a');
        hideDeleteDeviceForm();
        $("#messagesDevice").show();
-       setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-     })
-     .fail(function(jqXHR, textStatus, errorThrown) {
+
+       setTimeout(function() {
+         $("#messagesDevice").hide();
+       }, 10000);
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
        let response = JSON.parse(jqXHR.responseText);
-       hideDeleteDeviceForm();
+       $("#deleteDeviceIdLabel").addClass("errorClass");
        $("#messagesDevice").html(response.message);
        $("#messagesDevice").css('color', 'red');
        $("#messagesDevice").show();
-       setTimeout(function(){ $("#messagesDevice").hide(); }, 10000);
-     });
+
+       setTimeout(function() {
+         $("#messagesDevice").hide();
+       }, 10000);
+      });
+  }
 }
 
 // Passes deviceId to endpoint that will send POST request to ping device
@@ -159,7 +263,8 @@ function pingDevice(event, deviceId) {
         responseType: 'json',
         success: function (data, textStatus, jqXHR) {
           let response = JSON.parse(jqXHR.responseText);
-          $("#ping-" + deviceId + "-message").html(response.message);
+          let time = getTime(new Date());
+          $("#ping-" + deviceId + "-message").html(response.message + time);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             var response = JSON.parse(jqXHR.responseText);
@@ -224,33 +329,54 @@ function signalDevice(event, deviceId) {
 
 // Updates the full name on both the database and the front-end
 function updateName() {
-  $.ajax({
-    url: '/users/updateName',
-    method: 'POST',
-    headers: { 'x-auth': window.localStorage.getItem("authToken") },
-    contentType: 'application/json',
-    data: JSON.stringify({ 'fullName': $("#updateFullName").val() }),
-    dataType: 'json'
-   })
-     .done(function (data, textStatus, jqXHR) {
+  // Clear the contents of the error div every time form is submited
+  $("#fullNameErrorsList").html("");
 
-       // Name was changed successfully and will be updated in account.html
-       if(data.success == true) {
-         hideUpdateNameForm();
+  // Empty form is submitted
+  if($("#updateFullName").val() == "") {
+    $("#fullNameLabel").addClass("errorClass");
+    let node = document.createElement("li");
+    let textnode = document.createTextNode("Full name cannot be blank.")
+    node.appendChild(textnode);
+    document.getElementById("fullNameErrorsList").appendChild(node);
+    $("#fullNameErrors").show();
+  }
 
-         // Front-end will be updated and message shown for 10 seconds
-         $('#fullName').html($("#updateFullName").val());
-         $("#messagesUser").html(data.message);
-         $("#messagesUser").show();
-        setTimeout(function(){ $("#messagesUser").hide(); }, 10000);
+  else {
+    // Remove error class
+    $("#fullNameLabel").removeClass("errorClass");
 
-       }
+    $.ajax({
+      url: '/users/updateName',
+      method: 'POST',
+      headers: { 'x-auth': window.localStorage.getItem("authToken") },
+      contentType: 'application/json',
+      data: JSON.stringify({ 'fullName': $("#updateFullName").val() }),
+      dataType: 'json'
      })
-     .fail(function(jqXHR, textStatus, errorThrown) {
-       let response = JSON.parse(jqXHR.responseText);
-       $("#error").html("Error: " + response.message);
-       $("#error").show();
-     });
+      .done(function (data, textStatus, jqXHR) {
+
+        // Name was changed successfully and will be updated in account.html
+        if(data.success == true) {
+          hideUpdateNameForm();
+
+          // Front-end will be updated and message shown for 10 seconds
+          $('#fullName').html($("#updateFullName").val());
+          $("#messagesUser").html(data.message);
+          $("#messagesUser").show();
+
+          setTimeout(function() {
+            $("#messagesUser").hide();
+          }, 10000);
+
+         }
+       })
+       .fail(function(jqXHR, textStatus, errorThrown) {
+         let response = JSON.parse(jqXHR.responseText);
+         $("#error").html("Error: " + response.message);
+         $("#error").show();
+       });
+  }
 }
 
 // Updates the full name on both the database and the front-end
@@ -392,7 +518,10 @@ function updatePassword() {
            // Front-end will be updated and message shown for 10 seconds
            $("#messagesUser").html(data.message);
            $("#messagesUser").show();
-          setTimeout(function(){ $("#messagesUser").hide(); }, 10000);
+
+          setTimeout(function() {
+            $("#messagesUser").hide();
+          }, 10000);
          }
        })
        .fail(function(jqXHR, textStatus, errorThrown) {
@@ -415,7 +544,8 @@ function showUpdateNameForm() {
 function hideUpdateNameForm() {
   $("#updateNameControl").show();     // Show the update name link
   $("#updateNameForm").slideUp();     // Hide the update name form
-  $("#error").hide();
+  $("#fullNameErrors").hide();
+  $("#fullNameLabel").removeClass("errorClass");
 }
 
 // Show update password form and hide the update password button (really a link)
@@ -432,8 +562,7 @@ function hideUpdatePasswordForm() {
   $("#updatePasswordForm").slideUp();                       // Hide the update password form
   $("#passwordErrors").hide();                              // Remove error div
   $("#confirmNewPasswordLabel").removeClass("errorClass");  // Remove error class from label
-  $("#newPasswordLabel").removeClass("errorClass");  // Remove error class from label
-  $("#error").hide();
+  $("#newPasswordLabel").removeClass("errorClass");         // Remove error class from label
 }
 
 // Show add device form and hide the add device button (really a link)
@@ -445,9 +574,11 @@ function showAddDeviceForm() {
 
 // Hides the add device form and shows the add device button (link)
 function hideAddDeviceForm() {
-  $("#addDeviceControl").show();   // Show the add device link
-  $("#addDeviceForm").slideUp();   // Hide the add device form
-  $("#error").hide();
+  $("#addDeviceControl").show();                        // Show the add device link
+  $("#addDeviceForm").slideUp();                        // Hide the add device form
+  $("#deviceErrors").hide();
+  $("#messagesDevice").hide();
+  $("#addDeviceIdLabel").removeClass("errorClass");
 }
 
 // Show remove device form and hide the remove device button (really a link)
@@ -459,9 +590,11 @@ function showDeleteDeviceForm() {
 
 // Hides the remove device form and shows the remove device button (link)
 function hideDeleteDeviceForm() {
-  $("#deleteDeviceControl").show();   // Show the remove device link
-  $("#deleteDeviceForm").slideUp();   // Hide the remove device form
-  $("#error").hide();
+  $("#deleteDeviceControl").show();                     // Show the remove device link
+  $("#deleteDeviceForm").slideUp();                     // Hide the remove device form
+  $("#deleteDeviceIdLabel").removeClass("errorClass");
+  $("#messagesDevice").hide();
+  $("#deviceErrors").hide();
 }
 
 $(function() {
@@ -477,39 +610,6 @@ $(function() {
 
     // Create a timer that will update the front end after each interval
     let intervalID = setInterval(updateData, 10000);
-  }
-
-  // Updates the data on the front-end
-  function updateData() {
-    $.ajax({
-      url: '/users/account',
-      method: 'GET',
-      headers: { 'x-auth' : window.localStorage.getItem("authToken") },
-      dataType: 'json'
-    })
-    .done(function (data, textStatus, jqXHR) {
-      // Update data table
-      let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
-
-      for (let reading of data.readings) {
-        let date = getDate(new Date(reading.date));
-        let time = getTime(new Date(reading.date));
-
-        str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
-        "</td><td>" + reading.averageSPO2 + "</td></tr>"
-      }
-      $("#addDataTable").html(str + "</table>");
-
-      // Alert that it's time for new reading
-      if(data.alertFlag == 'true') {
-        console.log("Time to take a reading. Click 'Close' to continue" + data.alertFlag);
-      }
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      let response = JSON.parse(jqXHR.responseText);
-      $("#error").html("Error: " + response.message);
-      $("#error").show();
-    });
   }
 
   // Register event listeners
@@ -528,6 +628,37 @@ $(function() {
   $("#deleteDeviceLink").click(showDeleteDeviceForm);
   $("#removeDevice").click(removeDevice);
   $("#cancelDelete").click(hideDeleteDeviceForm);
+
+  // Register 'enter' key in forms
+  $("#updateFullName").keypress(function(event) {
+    if (event.which === 13) {
+      updateName();
+    }
+  });
+
+  $("#newPassword").keypress(function(event) {
+    if (event.which === 13) {
+      updatePassword();
+    }
+  });
+
+  $("#confirmNewPassword").keypress(function(event) {
+    if (event.which === 13) {
+      updatePassword();
+    }
+  });
+
+  $("#addDeviceId").keypress(function(event) {
+    if (event.which === 13) {
+      registerDevice();
+    }
+  });
+
+  $("#deleteDeviceId").keypress(function(event) {
+    if (event.which === 13) {
+      removeDevice();
+    }
+  });
 });
 
 

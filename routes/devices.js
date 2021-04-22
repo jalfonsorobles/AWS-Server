@@ -242,10 +242,8 @@ router.post('/ping', function(req, res, next) {
   .end((err, response) => {
 
     if(response.body.online == true && response.body.ok == true) {
-      let today = new Date();
-      let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
       responseJson.success = true;
-      responseJson.message = "Device pinged successfully at " + time;
+      responseJson.message = "Device pinged successfully at ";
       return res.status(200).json(responseJson);
     }
 
@@ -265,7 +263,7 @@ router.post('/ping', function(req, res, next) {
   });
 });
 
-// Signals the device or unsignals depending on previous condition 
+// Signals the device or unsignals depending on previous condition
 router.post('/signal', function(req, res, next) {
 
   let responseJson = {
