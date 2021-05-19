@@ -302,14 +302,14 @@ router.post('/updateDevice', function(req, res, next) {
             else {
 
               if(!response.body.hasOwnProperty("error_description")) {
-                responseJson.message = "Success updating database. Unable to reach device: " + response.body.error;
+                responseJson.message = "Unable to reach device: " + response.body.error;
                 responseJson.updated = false;
                 return res.status(200).json(responseJson);
               }
 
               else {
                 responseJson.updated = false;
-                responseJson.message = "Success updating database. Unable to reach device: " + response.body.error_description;
+                responseJson.message = "Unable to reach device: " + response.body.error_description;
                 return res.status(200).json(responseJson);
               }
             }
@@ -320,13 +320,13 @@ router.post('/updateDevice', function(req, res, next) {
 
           if(!response.body.hasOwnProperty("error_description")) {
             responseJson.updated = false;
-            responseJson.message = "Success updating database. Unable to reach device: " + response.body.error;
+            responseJson.message = "Unable to reach device: " + response.body.error;
             return res.status(200).json(responseJson);
           }
 
           else {
             responseJson.updated = false;
-            responseJson.message = "Success updating database. Unable to reach device: " + response.body.error_description;
+            responseJson.message = "Unable to reach device: " + response.body.error_description;
             return res.status(200).json(responseJson);
           }
         }
