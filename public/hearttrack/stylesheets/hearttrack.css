@@ -27,8 +27,21 @@
 #addDeviceForm, #deleteDeviceForm, #updateNameForm, #updatePasswordForm,  #main, #error, #passwordErrors,
 #fullNameErrors, #ServerResponse, #signInFormErrors, #deviceErrors, #dayChartErrors, #messagesWeeklySummary,
 #messagesDaySummary, #weeklyChartHeartRate, #weeklyChartSPO2, #dayChartHeartRate,
-#dayChartSPO2, #viewDaySummaryControl, #viewDaySummaryControlDiv, #messagesAllData {
+#dayChartSPO2, #viewDaySummaryControl, #viewDaySummaryControlDiv, #messagesAllData, #updateDeviceForm {
    display: none;
+}
+
+#sliderHoursValue {
+  margin-top: 20px;
+}
+
+#sliderHours, #sliderFrequency {
+  margin-top: 50px;
+}
+
+.updateDeviceOption {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .errorClass {
@@ -39,6 +52,11 @@
 
 .collection {
   padding-bottom: -4px;
+}
+
+.tab {
+  display: inline-block;
+	width: 140px;
 }
 
 .input-field input {

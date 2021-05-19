@@ -157,8 +157,8 @@ router.get('/account', function(req, res) {
 
             for(let reading of readings) {
               accountInfo["readings"].push({date:             reading.date,
-                                            averageHeartRate: reading.averageHeartRate,
-                                            averageSPO2:      reading.averageSPO2});
+                                            averageHeartRate: Math.round(reading.averageHeartRate),
+                                            averageSPO2:      Math.round(reading.averageSPO2)});
             }
 
             // Sort object by date, showing latest readings first
@@ -179,7 +179,9 @@ router.get('/account', function(req, res) {
           else {
 
             for(let device of devices) {
-              accountInfo['devices'].push({deviceId: device.deviceId, apiKey: device.apiKey});
+              accountInfo['devices'].push({ deviceId: device.deviceId, apiKey: device.apiKey,
+                                            startHour: device.startHour, endHour: device.endHour,
+                                            operatingFrequency: device.operatingFrequency });
             }
             res.status(200).json(accountInfo);
           }
@@ -245,8 +247,8 @@ router.get('/readings', function(req, res) {
 
             for(let reading of readings) {
               accountInfo["readings"].push({date:             reading.date,
-                                            averageHeartRate: reading.averageHeartRate,
-                                            averageSPO2:      reading.averageSPO2});
+                                            averageHeartRate: Math.round(reading.averageHeartRate),
+                                            averageSPO2:      Math.round(reading.averageSPO2)});
             }
 
             // Sort object by date, showing latest readings first

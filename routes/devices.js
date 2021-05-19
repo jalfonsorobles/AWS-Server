@@ -27,7 +27,10 @@ router.post('/register', function(req, res, next) {
     registered: false,
     message : "",
     apiKey : "none",
-    deviceId : "none"
+    deviceId : "none",
+    startHour: "",
+    endHour: "",
+    operatingFrequency: ""
   };
 
   // Ensure the request includes the deviceId parameter
@@ -39,7 +42,7 @@ router.post('/register', function(req, res, next) {
   let email = "";
 
   // If authToken provided, use email in authToken
-  if (req.headers["x-auth"]) {
+  if(req.headers["x-auth"]) {
 
     // AuthToken is valid
     try {
@@ -65,7 +68,8 @@ router.post('/register', function(req, res, next) {
 
   // See if device is already registered
   Device.findOne({ deviceId: req.body.deviceId }, { useFindAndModify: false }, function(err, device) {
-    if (device !== null) {
+
+    if(device !== null) {
       responseJson.message = "Device ID: " + req.body.deviceId + " already registered.";
       return res.status(400).json(responseJson);
     }
@@ -78,15 +82,17 @@ router.post('/register', function(req, res, next) {
       let newDevice = new Device({
         deviceId: req.body.deviceId,
         userEmail: email,
-        apiKey: deviceApikey
+        apiKey: deviceApikey,
+        startHour: 6,
+        endHour: 22,
+        operatingFrequency: 30
       });
 
       // Save device. If successful, return success. If not, return error message.
       newDevice.save(function(err, newDevice) {
 
-        if (err) {
+        if(err) {
           responseJson.message = err;
-          // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
           return res.status(400).json(responseJson);
         }
 
@@ -94,6 +100,9 @@ router.post('/register', function(req, res, next) {
           responseJson.registered = true;
           responseJson.apiKey = deviceApikey;
           responseJson.deviceId = req.body.deviceId;
+          responseJson.startHour = 6,
+          responseJson.endHour = 22,
+          responseJson.operatingFrequency = 30,
           responseJson.message = "Device ID: " + req.body.deviceId + " was registered.";
 
           // Add this device to the userDevices array in database
@@ -101,14 +110,12 @@ router.post('/register', function(req, res, next) {
             { email: email },
             { $push: { userDevices: newDevice.deviceId  } }, function (error, success) {
 
-            if (error) {
-              return res.status(400).json(responseJson);
-              console.log(error);
+            if(error) {
+              return res.status(400).json(error);
             }
 
             else {
               return res.status(201).json(responseJson);
-              console.log(success);
             }
           });
         }
@@ -133,7 +140,7 @@ router.post('/remove', function(req, res, next) {
   let email = "";
 
   // If authToken provided, use email in authToken
-  if (req.headers["x-auth"]) {
+  if(req.headers["x-auth"]) {
 
     // AuthToken is valid
     try {
@@ -161,8 +168,8 @@ router.post('/remove', function(req, res, next) {
   Device.findOne({ deviceId: req.body.deviceId }, { useFindAndModify: false }, function(err, device) {
 
     // Device is not in database
-    if (device == null) {
-      responseJson.message = "Device ID: " + req.body.deviceId + " is not registered.";
+    if(device == null || device.userEmail != email) {
+      responseJson.message = "Device ID: " + req.body.deviceId + " not registered under this account.";
       return res.status(400).json(responseJson);
     }
 
@@ -170,7 +177,7 @@ router.post('/remove', function(req, res, next) {
     else {
       Device.deleteOne({ deviceId: req.body.deviceId }, function(err, succ) {
 
-        if (err) {
+        if(err) {
           responseJson.message = err;
           return res.status(400).json(responseJson);
         }
@@ -184,7 +191,7 @@ router.post('/remove', function(req, res, next) {
             { email: email },
             { $pull: { userDevices: req.body.deviceId } }, function (error, success) {
 
-            if (error) {
+            if(error) {
               responseJson.message += " Cannot remove device from user's database."
               console.log(error);
               return res.status(400).json(responseJson);
@@ -200,7 +207,133 @@ router.post('/remove', function(req, res, next) {
   });
 });
 
+// Endpoint to update a device's operating hours with device ID
+router.post('/updateDevice', function(req, res, next) {
+  let responseJson = {
+    updated: false,
+    message : ""
+  };
 
+  // Ensure the request includes the deviceId parameter
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing device ID.";
+    return res.status(400).json(responseJson);
+  }
+
+  let email = "";
+
+  // If authToken provided, use email in authToken
+  if(req.headers["x-auth"]) {
+
+    // AuthToken is valid
+    try {
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+      email = decodedToken.email;
+    }
+
+    // AuthToken is invalid
+    catch (ex) {
+      responseJson.message = "Invalid authorization token.";
+      return res.status(401).json(responseJson);
+    }
+  }
+
+  else {
+    // Ensure the request includes the email parameter
+    if(!req.body.hasOwnProperty("email")) {
+      responseJson.message = "Invalid authorization token or missing email address.";
+      return res.status(401).json(responseJson);
+    }
+    email = req.body.email;
+  }
+
+  // See if device is registered under user
+  Device.findOne({ deviceId: req.body.deviceId }, { useFindAndModify: false }, function(err, device) {
+
+    if(err) {
+      responseJson.message = err;
+      console.log(err);
+      return res.status(400).json(responseJson);
+    }
+
+    if(device == null || device.userEmail != email) {
+      responseJson.message = "Device ID: " + req.body.deviceId + " not registered under this account.";
+      return res.status(400).json(responseJson);
+    }
+
+    else {
+      // Sending request using particleAccessToken
+      superagent
+      .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/updateHours")
+      .type('application/x-www-form-urlencoded')
+      .send({ access_token: particleAccessToken, arg: "" + req.body.startHour + req.body.endHour })
+      .end((err, response) => {
+
+        if(response.body.connected == true && response.body.return_value == true) {
+
+          // Sending request using particleAccessToken
+          superagent
+          .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/updateFrequency")
+          .type('application/x-www-form-urlencoded')
+          .send({ access_token: particleAccessToken, arg: req.body.operatingFrequency })
+          .end((err, response) => {
+
+            if(response.body.connected == true && response.body.return_value == true) {
+
+              // Update operating hours
+              Device.findOneAndUpdate(
+                { deviceId: req.body.deviceId },
+                { startHour: req.body.startHour, endHour: req.body.endHour, operatingFrequency: req.body.operatingFrequency },
+                function (error, device) {
+
+                if (error) {
+                  console.log(error);
+                  return res.status(400).json({ success: false, message: "Error contacting database" });
+                }
+
+                else {
+                  responseJson.updated = true;
+                  responseJson.message = "Hours of operation and frequency updated successfully";
+                  return res.status(200).json(responseJson);
+                }
+              });
+            }
+
+            else {
+
+              if(!response.body.hasOwnProperty("error_description")) {
+                responseJson.message = "Success updating database. Unable to reach device: " + response.body.error;
+                responseJson.updated = false;
+                return res.status(200).json(responseJson);
+              }
+
+              else {
+                responseJson.updated = false;
+                responseJson.message = "Success updating database. Unable to reach device: " + response.body.error_description;
+                return res.status(200).json(responseJson);
+              }
+            }
+          });
+        }
+
+        else {
+
+          if(!response.body.hasOwnProperty("error_description")) {
+            responseJson.updated = false;
+            responseJson.message = "Success updating database. Unable to reach device: " + response.body.error;
+            return res.status(200).json(responseJson);
+          }
+
+          else {
+            responseJson.updated = false;
+            responseJson.message = "Success updating database. Unable to reach device: " + response.body.error_description;
+            return res.status(200).json(responseJson);
+          }
+        }
+      });
+    }
+  });
+});
 
 // POST request to api.particle.io to ping device
 router.post('/ping', function(req, res, next) {
@@ -225,14 +358,6 @@ router.post('/ping', function(req, res, next) {
     responseJson.message = "Invalid authorization token.";
     return res.status(400).json(responseJson);
   }
-
-  // request({
-  //    method: "POST",
-  //    uri: "https://api.particle.io/v1/devices/" + req.body.deviceId + "/ping",
-  //    form: {
-  //      access_token : particleAccessToken
-  //     }
-  // });
 
   // Sending request using particleAccessToken
   superagent

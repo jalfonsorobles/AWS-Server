@@ -23,12 +23,17 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   // Add the devices to the list before the list item for the add device button (link) and
   // populates the options to ping and signal device(s).
   for (let device of data.devices) {
-    $("#addDeviceForm").before("<li class='collection-item' id='device-" + device.deviceId + "'>ID: " +
-    device.deviceId + "<br>APIKEY: " + device.apiKey + "<br><button id='ping-" + device.deviceId +
-      "' class='waves-effect waves-light btn'>Ping</button> " + "<span id='ping-" + device.deviceId +
-      "-message'></span>" + "<br><button id='signal-" + device.deviceId +
-      "' class='waves-effect waves-light btn'>Signal</button> " + "<span id='signal-" + device.deviceId +
-      "-message'></span>" + "</li>");
+    $("#addDeviceForm").before("<li class='collection-item' id='device-" + device.deviceId +
+    "'><span class='tab'>DEVICE ID:</span>" + device.deviceId + "<br><span class='tab'>APIKEY:</span>" +
+    device.apiKey + "<br><span class='tab'>Start Hour:</span><span id='startHour-" + device.deviceId + "'>" +
+    device.startHour + "</span>:00 <br><span class='tab'>End Hour:</span><span id='endHour-" +
+    device.deviceId + "'>" + device.endHour + "</span>:00" +
+    "<br><span class='tab'>Frequency:</span><span id='operatingFrequency-" + device.deviceId + "'>" +
+    device.operatingFrequency + "</span> minutes<br><button id='ping-" + device.deviceId +
+    "' class='waves-effect waves-light btn'>Ping</button> " + "<span id='ping-" + device.deviceId +
+    "-message'></span>" + "<br><button id='signal-" + device.deviceId +
+    "' class='waves-effect waves-light btn'>Signal</button> " + "<span id='signal-" + device.deviceId +
+    "-message'></span>" + "</li>");
 
     $("#ping-" + device.deviceId).click(function(event) {
       pingDevice(event, device.deviceId);
@@ -67,6 +72,71 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
     }
     $("#addDataTable").html(str + "</table>");
   }
+
+  // NoUiSlider tool
+  var sliderHours = document.getElementById('sliderHours');
+  var sliderFrequency = document.getElementById('sliderFrequency');
+
+  var sliderHoursValueElement = document.getElementById('sliderHoursValue');
+  var sliderFrequencyValueElement = document.getElementById('sliderFrequencyValue');
+
+  noUiSlider.create(sliderHours, {
+    start: [6, 22],
+    connect: true,
+    step: 1,
+    orientation: 'horizontal',
+    range: {
+        'min': 0,
+        'max': 23
+    },
+    format: wNumb({
+      decimals: 0
+      }),
+    format: {
+      // 'to' the formatted value. Receives a number.
+      to: function (value) {
+          return Math.ceil(value);
+      },
+      // 'from' the formatted value. Receives a string, should return a number.
+      from: function (value) {
+          return value
+      }
+    }
+  });
+
+  sliderHours.noUiSlider.on('update', function (values, handle) {
+      sliderHoursValueElement.innerHTML = "<span class='tab'>New hours:</span> " +
+      values[0] + ":00 - " + values[1] + ":00";
+  });
+
+  noUiSlider.create(sliderFrequency, {
+      start: [30],
+      connect: true,
+      step: 15,
+      orientation: 'horizontal',
+      range: {
+          'min': [15],
+          'max': [240]
+      },
+      format: wNumb({
+        decimals: 0
+        }),
+      format: {
+        // 'to' the formatted value. Receives a number.
+        to: function (value) {
+            return (parseInt(value / 15) * 15);
+        },
+        // 'from' the formatted value. Receives a string, should return a number.
+        from: function (value) {
+            return value
+        }
+      }
+  });
+
+  sliderFrequency.noUiSlider.on('update', function (values, handle) {
+      sliderFrequencyValueElement.innerHTML = "<span class='tab'>New Frequency:</span> " +
+      values[handle] + " minutes";
+  });
 }
 
 // Updates the data on the front-end
@@ -105,7 +175,7 @@ function updateData() {
 
     // Alert that it's time for new reading
     if(data.alertFlag == 'true') {
-      console.log("Time to take a reading. Click 'Close' to continue" + data.alertFlag);
+      window.alert("Time to take a reading. Click 'Close' to continue.");
     }
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
@@ -160,12 +230,17 @@ function registerDevice() {
      })
        .done(function (data, textStatus, jqXHR) {
          // Add new device to the device list
-         $("#addDeviceForm").before("<li class='collection-item' id='device-" + data["deviceId"] + "'>ID: " +
-         $("#addDeviceId").val() + "<br>APIKEY: " + data["apiKey"] + "<br><button id='ping-" + data["deviceId"] +
-          "' class='waves-effect waves-light btn'>Ping</button> " +
-          "<span id='ping-" + data["deviceId"] + "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
-          "' class='waves-effect waves-light btn'>Signal</button> " +
-          "<span id='signal-" + data["deviceId"] + "-message'></span>" + "</li>");
+         $("#addDeviceForm").before("<li class='collection-item' id='device-" + data["deviceId"] +
+         "'><span class='tab'>DEVICE ID:</span>" + $("#addDeviceId").val() + "<br><span class='tab'>APIKEY:</span>" +
+         data["apiKey"] + "<br><span class='tab'>Start Hour:</span><span id='startHour-" + data["deviceId"] + "'>" +
+         data["startHour"] + "</span>:00 <br><span class='tab'>End Hour:</span><span id='endHour-" + data["deviceId"] +
+         "'>" + data["endHour"] + "</span>:00" +
+         "<br><span class='tab'>Frequency:</span><span id='operatingFrequency-" + data["deviceId"] + "'>" +
+         data["operatingFrequency"] + "</span> minutes<br><button id='ping-" + data["deviceId"] +
+         "' class='waves-effect waves-light btn'>Ping</button> " + "<span id='ping-" + data["deviceId"] +
+         "-message'></span>" + "<br><button id='signal-" + data["deviceId"] +
+         "' class='waves-effect waves-light btn'>Signal</button> " + "<span id='signal-" +
+         data["deviceId"] + "-message'></span>" + "</li>");
 
           $("#ping-" + data["deviceId"]).click(function(event) {
              pingDevice(event, data["deviceId"]);
@@ -252,6 +327,81 @@ function removeDevice() {
   }
 }
 
+// Updates the specified device's hours of operation.
+function updateOperatingHoursFrequency() {
+  // Clear the contents of the error div every time form is submited
+  $("#deviceErrorsList").html("");
+
+  // Empty form is submitted
+  if($("#updateDeviceId").val() == "") {
+    $("#updateDeviceLabel").addClass("errorClass");
+    let node = document.createElement("li");
+    let textnode = document.createTextNode("Enter a Device ID to update operating hours.")
+    node.appendChild(textnode);
+    document.getElementById("deviceErrorsList").appendChild(node);
+    $("#deviceErrors").show();
+  }
+
+  else {
+    // Remove error class
+    $("#updateDeviceLabel").removeClass("errorClass");
+
+    // Array that holds values of new operating times
+    let operatingTimes = sliderHours.noUiSlider.get();
+    let operatingFrequency = parseInt(sliderFrequency.noUiSlider.get());
+
+    $.ajax({
+      url: '/devices/updateDevice',
+      method: 'POST',
+      headers: { 'x-auth': window.localStorage.getItem("authToken") },
+      contentType: 'application/json',
+      data: JSON.stringify({ 'deviceId': $("#updateDeviceId").val(), 'startHour': operatingTimes[0],
+                             'endHour': operatingTimes[1], 'operatingFrequency': operatingFrequency }),
+      dataType: 'json'
+     })
+      .done(function (data, textStatus, jqXHR) {
+       let response = JSON.parse(jqXHR.responseText);
+
+       // Success in updating both the database and the device
+       if (response.updated == true) {
+         // Update hours on device information
+         $("#startHour-" + $("#updateDeviceId").val()).html(operatingTimes[0]);
+         $("#endHour-" + $("#updateDeviceId").val()).html(operatingTimes[1]);
+         $("#operatingFrequency-" + $("#updateDeviceId").val()).html(operatingFrequency);
+         $("#messagesDevice").html(response.message);
+         $("#messagesDevice").css('color', '#26a69a');
+         hideUpdateDeviceHoursForm();
+         $("#messagesDevice").show();
+
+         setTimeout(function() {
+           $("#messagesDevice").hide();
+         }, 10000);
+       }
+
+       else {
+         $("#messagesDevice").html(response.message);
+         $("#messagesDevice").css('color', 'red');
+         $("#messagesDevice").show();
+
+         setTimeout(function() {
+           $("#messagesDevice").hide();
+         }, 10000);
+       }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+       let response = JSON.parse(jqXHR.responseText);
+       $("#updateDeviceLabel").addClass("errorClass");
+       $("#messagesDevice").html(response.message);
+       $("#messagesDevice").css('color', 'red');
+       $("#messagesDevice").show();
+
+       setTimeout(function() {
+         $("#messagesDevice").hide();
+       }, 10000);
+      });
+  }
+}
+
 // Passes deviceId to endpoint that will send POST request to ping device
 function pingDevice(event, deviceId) {
   $("#ping-" + deviceId + "-message").html("");
@@ -263,8 +413,15 @@ function pingDevice(event, deviceId) {
         responseType: 'json',
         success: function (data, textStatus, jqXHR) {
           let response = JSON.parse(jqXHR.responseText);
-          let time = getTime(new Date());
-          $("#ping-" + deviceId + "-message").html(response.message + time);
+
+          if(response.success) {
+            let time = getTime(new Date());
+            $("#ping-" + deviceId + "-message").html(response.message + time);
+          }
+
+          else {
+            $("#ping-" + deviceId + "-message").html(response.message);
+          }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             var response = JSON.parse(jqXHR.responseText);
@@ -592,9 +749,25 @@ function showDeleteDeviceForm() {
 function hideDeleteDeviceForm() {
   $("#deleteDeviceControl").show();                     // Show the remove device link
   $("#deleteDeviceForm").slideUp();                     // Hide the remove device form
-  $("#deleteDeviceIdLabel").removeClass("errorClass");
-  $("#messagesDevice").hide();
-  $("#deviceErrors").hide();
+  $("#deleteDeviceIdLabel").removeClass("errorClass");  // Removes error classes
+  $("#messagesDevice").hide();                          // Hides previous messages
+  $("#deviceErrors").hide();                            // Hides previous error messages
+}
+
+// Show update device hours form and hide the button (really a link)
+function showUpdateDeviceHoursForm() {
+  $("#updateDeviceId").val("");          // Clear the input for the device ID
+  $("#updateOperatingHoursControl").hide();   // Hide the update hours link
+  $("#updateDeviceForm").slideDown();          // Show the update hours form
+}
+
+// Hides the update device hours form and shows the button (link)
+function hideUpdateDeviceHoursForm() {
+  $("#updateOperatingHoursControl").show();               // Show the update hours link
+  $("#updateDeviceForm").slideUp();                        // Hide the update hours form
+  $("#deviceErrors").hide();                              // Hides previous error messages
+  $("#messagesDevice").hide();                            // Hides previous messages
+  $("#updateDeviceLabel").removeClass("errorClass"); // Removes error classes
 }
 
 $(function() {
@@ -629,6 +802,10 @@ $(function() {
   $("#removeDevice").click(removeDevice);
   $("#cancelDelete").click(hideDeleteDeviceForm);
 
+  $("#updateOperatingHoursLink").click(showUpdateDeviceHoursForm);
+  $("#updateOperatingHoursFrequency").click(updateOperatingHoursFrequency);
+  $("#cancelUpdateOperatingHours").click(hideUpdateDeviceHoursForm);
+
   // Register 'enter' key in forms
   $("#updateFullName").keypress(function(event) {
     if (event.which === 13) {
@@ -657,6 +834,12 @@ $(function() {
   $("#deleteDeviceId").keypress(function(event) {
     if (event.which === 13) {
       removeDevice();
+    }
+  });
+
+  $("#updateDeviceId").keypress(function(event) {
+    if (event.which === 13) {
+      updateOperatingHoursFrequency();
     }
   });
 });
