@@ -4,19 +4,48 @@
 	<head>
 		<title>Kassandrita</title>
 
-    <link rel="shortcut icon" href="./hearttrack/images/Kassandrita.png">
+    <!-- Import jQuery -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+		<link rel="shortcut icon" href="./hearttrack/images/Kassandrita.png">
     <link href="./hearttrack/stylesheets/Kassandrita.css" rel="stylesheet">
     <script src="./hearttrack/javascripts/Kassandrita.js"></script>
-    <!-- Import jQuery -->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
 	</head>
 	<body>
     <div id="page">
       <div class="textbox">
+
+				<h2>Querido amor de mi vida,</h2>
+				<p>&nbsp&nbsp&nbsp&nbsp&nbsp
+					Necesito ser justo y darte tu tiempo, a pesar de que me duela con toda mi alma dejarte ir.
+					Jamás he amado a alguien como te amo a ti, y verme en tus ojos indiferentes me partió el corazón.
+					Yo no soy una persona muy emocional ni expresiva, pero aquella noche me desmoroné entre tus brazos y
+					toque fondo. Sentí cosas que jamás había sentido, creo que fue un ataque de pánico ya que no tenía control
+					de mi respiración ni pulso. Me siento muy triste de que solo por compasión y respeto me sostuviste, ya que
+					jamás me imaginaba que ya no sentías amor por mi.<br>
+					&nbsp&nbsp&nbsp&nbsp&nbspFui muy incomprensible en muchos aspectos, y me di cuenta muy tarde eso. No tienes idea de cómo me arrepiento
+					no de haber estado ahí el mes de junio contigo, a tu lado como debía. Del fondo de mi corazón, te pido
+					disculpas. Si hay algo que quisiera que tomaras de este pequeño mensaje es que no me he dado por vencido,
+					que te amo con todo mi corazón y te llevo en mis planes del futuro. No puedo prometer que no te buscare o
+					intentare contactarte, el corazón no ve ese tipo de lógica y razonamiento. Lo que si te puedo prometer es
+					que mejorare como persona, para ser mejor pareja para ti si llegas a dar otra oportunidad. Hay tantas cosas
+					que quiero hacer contigo, experimentar juntos, viajar, crecer juntos, adaptar buenos hábitos &hearts; No tienes
+					idea de como te extraño Kassandra, mi corazón me reclama cada instante que no sé de ti, que no estoy contigo.
+					Te dedico este blog mi amor, como un pequeño detalle de mi afección y amor hacia a ti. No dejo de pensar en el dia
+					perfecto que tuvimos el 14 de Febrero. Por favor espérame, no me reemplaces.
+
+
+				</p>
+
+
+				<br><hr><br>
+
         <h2>Hola amorcito,</h2>
 
         <p>
-          &nbsp&nbsp&nbsp&nbspEstos días que he estado apartado de ti han sido muy tristes.
+          &nbsp&nbsp&nbsp&nbsp&nbspEstos días que he estado apartado de ti han sido muy tristes.
           Te extraño muchísimo y no puedo dejar de pensar en ti todo el tiempo.
           Ya quiero volver a verte y quiero ganarme tu perdón. Yo se que me pediste que te diera tiempo
           y por eso quise hacerte este pequeño detalle de un ingeniero a una hermosa interpreta que es muy buena
@@ -27,7 +56,7 @@
           no quieres saber de mi, pero quiero tomar acción y poder volver a verte y compartir este hermoso sentimiento
           que me unió a ti.
           <br>
-          &nbsp&nbsp&nbsp&nbspEsta no es una carta formal, simplemente una invitación (la carta la escribí físicamente).
+          &nbsp&nbsp&nbsp&nbsp&nbspEsta no es una carta formal, simplemente una invitación (la carta la escribí físicamente).
           Tengo un pequeño detalle que quiero obsequiarte y por eso quería invitarte a Hermosillo conmigo el próximo
           fin de semana. Me encantaría pasar el tiempo que tengas disponible ese fin de semana y quizás podamos festejar
           mi cumpleaños yendo a cenar juntos. No se si estés en Tucson o Agua Prieta pero pudiera ir por ti en
@@ -55,103 +84,6 @@
     </div>
 	</body>
 	<script>
-
-		var brd = document.getElementById("page")
-		document.body.insertBefore(brd, document.getElementById("board"));
-
-		const duration = 3000;
-		const speed = 0.5;
-		const cursorXOffset = 0;
-		const cursorYOffset = -5;
-
-		var hearts = [];
-
-		function generateHeart(x, y, xBound, xStart, scale)
-		{
-			var heart = document.createElement("DIV");
-			heart.setAttribute('class', 'heart');
-			brd.appendChild(heart);
-			heart.time = duration;
-			heart.x = x;
-			heart.y = y;
-			heart.bound = xBound;
-			heart.direction = xStart;
-			heart.style.left = heart.x + "px";
-			heart.style.top = heart.y + "px";
-			heart.scale = scale;
-			heart.style.transform = "scale(" + scale + "," + scale + ")";
-			if(hearts == null)
-				hearts = [];
-			hearts.push(heart);
-			return heart;
-		}
-
-		var down = false;
-		var event = null;
-
-		document.onmousedown = function(e) {
-			down = true;
-			event = e;
-		}
-
-		document.onmouseup = function(e) {
-			down = false;
-		}
-
-		document.onmousemove = function(e) {
-			event = e;
-		}
-
-		document.ontouchstart = function(e) {
-			down = true;
-			event = e.touches[0];
-		}
-
-		document.ontouchend = function(e) {
-			down = false;
-		}
-
-		document.ontouchmove = function(e) {
-			event = e.touches[0];
-		}
-
-		var before = Date.now();
-		var id = setInterval(frame, 5);
-		var gr = setInterval(check, 100);
-
-		function frame()
-		{
-			var current = Date.now();
-			var deltaTime = current - before;
-			before = current;
-			for(i in hearts)
-			{
-				var heart = hearts[i];
-				heart.time -= deltaTime;
-				if(heart.time > 0)
-				{
-					heart.y -= speed;
-					heart.style.top = heart.y + "px";
-					heart.style.left = heart.x + heart.direction * heart.bound * Math.sin(heart.y * heart.scale / 30) / heart.y * 200 + "px";
-				}
-				else
-				{
-					heart.parentNode.removeChild(heart);
-					hearts.splice(i, 1);
-				}
-			}
-		}
-
-		function check()
-		{
-			if(down)
-			{
-				var start = 1 - Math.round(Math.random()) * 2;
-				var scale = Math.random() * Math.random() * 0.8 + 0.2;
-				var bound = 30 + Math.random() * 20;
-				generateHeart(event.pageX - brd.offsetLeft + cursorXOffset, event.pageY - brd.offsetTop + cursorYOffset, bound, start, scale);
-			}
-		}
 
 	</script>
 </html>

@@ -50,8 +50,9 @@ h2 {
   display: none;
 }
 
- p {
+ .textbox p {
    font-family: 'Trebuchet MS', sans-serif;
+   text-align: left;
  }
 
  .largeButton {
