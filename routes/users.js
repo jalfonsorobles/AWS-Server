@@ -24,7 +24,6 @@ router.post('/register', function(req, res) {
 
     // New User object is created from req.body parameters and hashed password
     else {
-
       let newUser = new User({
         email: req.body.email,
         fullName: req.body.fullName,
