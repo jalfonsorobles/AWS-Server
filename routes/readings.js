@@ -36,10 +36,14 @@ router.post('/data', function(req, res) {
 
     // Case where API key is verified and data can be saved in database
     else {
+
+
+
+
       // Create a new reading with passed data
       let newReading = new Reading({
         userEmail: device.userEmail,
-        date: Date(),
+        date: ((req.body.date * 1000)),
         averageHeartRate: req.body.avgBPM,
         averageSPO2: req.body.avgSPO2,
         deviceId: req.body.deviceId,
@@ -118,6 +122,23 @@ router.post('/alert', function(req, res) {
         User.findOneAndUpdate(
           { email: device.userEmail },
           { alertFlag: true }, function (error, success) {
+
+          if (error) {
+            console.log(error);
+            return res.status(400).json({ success: false, message: "Error contacting database" });
+          }
+
+          else {
+            return res.status(201).json({ success: true, message: "reminderFlag changed successfully" });
+          }
+        });
+      }
+
+      else {
+        // Change the reminderFlag to true
+        User.findOneAndUpdate(
+          { email: device.userEmail },
+          { alertFlag: false }, function (error, success) {
 
           if (error) {
             console.log(error);

@@ -2,7 +2,7 @@ let db = require("../db");
 
 let userSchema = new db.Schema({
   userEmail:        String,
-  date:             { type: Date, default: Date.now },
+  date:             [ Date ],
   averageHeartRate: [ Number ],
   averageSPO2:      [ Number ]
 });
