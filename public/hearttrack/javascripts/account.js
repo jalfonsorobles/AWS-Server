@@ -172,6 +172,23 @@ function updateData() {
       }
       $("#addDataTable").html(str + "</table>");
     }
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    let response = JSON.parse(jqXHR.responseText);
+    $("#error").html("Error: " + response.message);
+    $("#error").show();
+  });
+}
+
+// Will alert user in case flag is high
+function updateFlag() {
+  $.ajax({
+    url: '/users/readings',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+  .done(function (data, textStatus, jqXHR) {
 
     // Alert that it's time for new reading
     if(data.alertFlag == 'true') {
@@ -781,8 +798,9 @@ $(function() {
     // Send request for account information since authToken exists
     sendAccountRequest();
 
-    // Create a timer that will update the front end after each interval
-    let intervalID = setInterval(updateData, 10000);
+    // Create timers that will update the front end after each interval
+    let updateDataInterval = setInterval(updateData, 10000);
+    let updateFlagInterval = setInterval(updateFlag, 300000);
   }
 
   // Register event listeners

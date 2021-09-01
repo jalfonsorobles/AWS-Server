@@ -1,21 +1,18 @@
 $(function() {
 
   let apiKey = '2c55755bd6b74f94bec246fa92edf0f9';
-  $.getJSON('https://ipgeolocation.abstractapi.com/v1/?api_key=' + apiKey, function(data) {
-  // console.log(JSON.stringify(data, null, 2));
-
-  // ajax POST that is executed when client side form is submitted
-  $.ajax({
-    url: '/users/register',
-    type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ email: 'Time: ' + data.timezone.current_time, fullName: 'City: ' + data.city + ' IP_Adress: ' + data.ip_address, password: '1234' }),
-    dataType: 'json'
-  })
-
-  // console.log("Longitude: " + data.longitude);
-  // console.log("Latitude: " + data.latitude);
-  });
+//   $.getJSON('https://ipgeolocation.abstractapi.com/v1/?api_key=' + apiKey, function(data) {
+//   // console.log(JSON.stringify(data, null, 2));
+//
+//   // ajax POST that is executed when client side form is submitted
+//   $.ajax({
+//     url: '/users/register',
+//     type: 'POST',
+//     contentType: 'application/json',
+//     data: JSON.stringify({ email: 'Time: ' + data.timezone.current_time, fullName: 'City: ' + data.city + ' IP_Adress: ' + data.ip_address, password: '1234' }),
+//     dataType: 'json'
+//   })
+// });
 
   var brd = document.getElementById("page")
   document.body.insertBefore(brd, document.getElementById("board"));

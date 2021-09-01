@@ -12,6 +12,10 @@ function getReadingsData() {
   })
     .done(function (data, textStatus, jqXHR) {
 
+      // Create timers that will update the front end after each interval
+      let updateDataInterval = setInterval(updateData, 10000);
+      let updateFlagInterval = setInterval(updateFlag, 300000);
+
       // No data has been collected at all, display message to alert user
       if (Object.keys(data.readings).length == 0) {
         $("#messagesDaySummary").html("No data has been collected.");
@@ -266,6 +270,60 @@ function getReadingsData() {
       $("#error").html("Error: " + response.message);
       $("#error").show();
     });
+}
+
+// Updates the data on the front-end
+function updateData() {
+  $.ajax({
+    url: '/users/readings',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+  .done(function (data, textStatus, jqXHR) {
+
+    // Case where data is stored immediately after registration
+    if (Object.keys(data.readings).length != 0) {
+      let str = "<table><tr><th>Date</th><th>Time</th><th>Average BPM</th><th>Average SPO2</th></tr>";
+
+      for (let reading of data.readings) {
+        let date = getDate(new Date(reading.date));
+        let time = getTime(new Date(reading.date));
+
+        str += "<tr><td>" + date + "</td><td>" + time + "</td><td>" + reading.averageHeartRate +
+        "</td><td>" + reading.averageSPO2 + "</td></tr>";
+      }
+      $("#addDataTable").html(str + "</table>");
+      $("#data").show();
+    }
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    let response = JSON.parse(jqXHR.responseText);
+    $("#error").html("Error: " + response.message);
+    $("#error").show();
+  });
+}
+
+// Will alert user in case flag is high
+function updateFlag() {
+  $.ajax({
+    url: '/users/readings',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+  .done(function (data, textStatus, jqXHR) {
+
+    // Alert that it's time for new reading
+    if(data.alertFlag == 'true') {
+      window.alert("Time to take a reading. Click 'Close' to continue.");
+    }
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    let response = JSON.parse(jqXHR.responseText);
+    $("#error").html("Error: " + response.message);
+    $("#error").show();
+  });
 }
 
 // Show or hide weekly summary charts function
