@@ -1,6 +1,20 @@
-// Replaces the website visited in browser so that when the back button is cliked, client is sent to the right website
+// Replaces the website visited in browser so that when the back button is cliked,
+// client is sent to the right website and updates last access date
 if (window.localStorage.getItem("authToken")) {
-  window.location.replace("account.html");
+
+  $.ajax({
+    url: '/users/updateLastAccessDate',
+    method: 'POST',
+    contentType: 'application/json',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+    .done(function (data) {
+      window.location.replace("account.html");
+    })
+    .fail(function (data) {
+      console.log(data);
+    })
 }
 
 // Ajax POST function that will execute when client side form is submitted

@@ -103,11 +103,32 @@ router.post('/signin', function(req, res) {
   });
 });
 
+// Updates the last access date when authToken is provided prior to signin
+router.post('/updateLastAccessDate', function(req, res) {
+  let authToken = req.headers["x-auth"];
+  let decodedToken = jwt.decode(authToken, secret);
+
+  // Update lastAccess date in database
+  User.findOneAndUpdate(
+    { email: decodedToken.email },
+    { lastAccess: Date.now() }, function (error, success) {
+
+    if(error) {
+      console.log(error);
+      return res.status(400).json({ success: false, message: "Error contacting database." });
+    }
+
+    else {
+      res.status(201).json({ success: true, message: "Last access date updated to " + success.lastAccess});
+    }
+  });
+});
+
 // Retrieving account information
 router.get('/account', function(req, res) {
 
   // Case where there does not exists an authToken
-  if (!req.headers["x-auth"]) {
+  if(!req.headers["x-auth"]) {
     res.status(401).json({ success: false, message: "No authentication token."});
     return;
   }
@@ -123,7 +144,7 @@ router.get('/account', function(req, res) {
     let decodedToken = jwt.decode(authToken, secret);
 
     // Find user in database by searching for email
-    User.findOne({email: decodedToken.email}, function(err, user) {
+    User.findOne({ email: decodedToken.email }, function(err, user) {
 
       // Error when contacting database
       if (err) {
@@ -146,7 +167,7 @@ router.get('/account', function(req, res) {
         accountInfo["alertFlag"] = user.alertFlag;
 
         // Adding readings to the response object
-        Reading.find({userEmail: decodedToken.email}, function(err, readings) {
+        Reading.find({ userEmail: decodedToken.email }, function(err, readings) {
 
           if(err) {
             res.status(400).json({success: false, message: "Error contacting database."});
