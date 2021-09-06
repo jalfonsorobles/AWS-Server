@@ -37,22 +37,22 @@
                             <br />
                             <table class="power" cellpadding="10" cellspacing="0">
                                 <tr>
-                                    <th align="center">Power</th>
+                                    <th align="center">Escoje tu power</th>
                                 </tr>
                                 <tr>
-                                    <td width="78" align="center" id="pw3" onClick="powerSelected(3);">High</td>
+                                    <td width="78" align="center" id="pw3" onClick="powerSelected(3);">Fuerte</td>
                                 </tr>
                                 <tr>
-                                    <td align="center" id="pw2" onClick="powerSelected(2);">Med</td>
+                                    <td align="center" id="pw2" onClick="powerSelected(2);">Normalon</td>
                                 </tr>
                                 <tr>
-                                    <td align="center" id="pw1" onClick="powerSelected(1);">Low</td>
+                                    <td align="center" id="pw1" onClick="powerSelected(1);">Sin ganas</td>
                                 </tr>
                             </table>
                             <br />
                             <img id="spin_button" src="spin_off.png" alt="Spin" onClick="startSpin();" />
                             <br /><br />
-                            &nbsp;&nbsp;<a href="#" onClick="resetWheel(); return false;">Play Again</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reset)
+                            &nbsp;&nbsp;<a href="#" onClick="resetWheel(); return false;">Dale otra vez</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </div>
                     </td>
                     <td width="438" height="582" class="the_wheel" align="center" valign="center">
@@ -65,14 +65,14 @@
         </div>
 
         <div class="reglas">
-          #1 - Cerveza <br>
-          #2 - Bebida preparada <br>
-          #3 - Lo que esten tomando a tu derecha <br>
-          #4 - Whiskey <br>
-          #5 - Baila y tomate un shot <br>
-          #6 - Que decida Jesus Alfonso por ti <br>
-          #7 - Shot <br>
-          #8 - Lo mismo que el que se ria primero <br>
+          <p id="#1">#1 - Cerveza</p> <br>
+          <p id="#2">#2 - Bebida preparada</p> <br>
+          <p id="#3">#3 - Lo que esten tomando a tu derecha</p> <br>
+          <p id="#4">#4 - Whiskey</p> <br>
+          <p id="#5">#5 - Baila y tomate un shot</p> <br>
+          <p id="#6">#6 - Que decida Jesus Alfonso por ti</p> <br>
+          <p id="#7">#7 - Shot</p> <br>
+          <p id="#8">#8 - Lo mismo que el que se ria primero</p> <br>
 
 
         </div>
@@ -213,7 +213,7 @@
             function alertPrize(indicatedSegment)
             {
                 // Do basic alert of the segment text. You would probably want to do something more interesting with this information.
-                alert("You have won " + indicatedSegment.text);
+                alert("Si no sabes que tomar pa' que la juegas. Tomate un: " + indicatedSegment.text);
             }
         </script>
     </body>
