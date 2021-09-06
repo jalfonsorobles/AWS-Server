@@ -21,7 +21,7 @@ using namespace std;
 //-------------------------------------------------------------------
 
 class BPMMonitorSM {
-   enum State { S_Init, S_ReadBPMSensor, S_ReadSPO2Sensor, S_Report};
+   enum State { S_Init, S_ReadBPMSensor, S_ReadSPO2Sensor, S_Save, S_Report};
 
 private:
    State state;
@@ -34,14 +34,21 @@ private:
    float bpmHistory[SAMPLE_SIZE];
    int32_t spo2History[SAMPLE_SIZE];
    bool sampleReported;
+   bool alertTimer;
+   vector<float> bpmReports;
+   vector<float> SPO2Reports;
+   vector<int> dateCollected;
+   
     
 public:
    BPMMonitorSM(MAX30105& mySensor);  
    void execute();
-   void changeSampleReported();
+   void changeSampleReported(bool);
+   void changeAlertTimer(bool);
+   void connectCloud();
    float getBPM();
    bool getReportedStatus();
-   void alertLED();
+   bool getAlertTimerStatus();
 };
 
 //-------------------------------------------------------------------
