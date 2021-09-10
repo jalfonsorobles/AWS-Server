@@ -1,11 +1,11 @@
-#logo {
-    margin: 5px;
-    width: 50px;
+#name {
+  font-size: 35px;
+  margin-top: -15px;
 }
 
-#name {
-    font-size: 32pt;
-    vertical-align: top;
+#logo {
+  width: 45px;
+  padding-top: 5px;
 }
 
 #messagesUser, #messagesDevice, #messagesWeeklySummary, #messagesDaySummary, #messagesAllData {
@@ -56,7 +56,7 @@
 
 .tab {
   display: inline-block;
-	width: 140px;
+	width: 340px;
 }
 
 .input-field input {
@@ -93,4 +93,29 @@ canvas {
 
 td {
   width: 25%;
+}
+
+html {
+  font-size: 13px;
+}
+
+@media screen and (min-width: 500px) {
+  #logo {
+      margin: 5px;
+      width: 50px;
+  }
+
+  #name {
+      font-size: 32pt;
+      vertical-align: top;
+  }
+
+  .tab {
+    display: inline-block;
+  	width: 140px;
+  }
+
+  html {
+    font-size: 18px;
+  }
 }

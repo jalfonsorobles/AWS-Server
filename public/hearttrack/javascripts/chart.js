@@ -41,8 +41,14 @@ function getReadingsData() {
       // Sets up the datepicker calendar
       $('.datepicker').datepicker(options);
 
-      // Global font size for Charts
-      Chart.defaults.global.defaultFontSize = 18;
+      // Determine size of window to adjust font size
+      if($(window).width() <= 500) {
+        Chart.defaults.global.defaultFontSize = 8;
+      }
+
+      else {
+        Chart.defaults.global.defaultFontSize = 18;
+      }
 
       // Get date of latest readings and calculate the past week from there
       let initDay = getDateLong(new Date(data.readings[0].date));
@@ -439,8 +445,14 @@ $(function() {
           return;
         }
 
-        // Global font size for Charts
-        Chart.defaults.global.defaultFontSize = 18;
+        // Determine size of window to adjust font size
+        if($(window).width() <= 500) {
+          Chart.defaults.global.defaultFontSize = 8;
+        }
+
+        else {
+          Chart.defaults.global.defaultFontSize = 18;
+        }
 
         // Get average data for heart rate and SPO2
         let labels = [];

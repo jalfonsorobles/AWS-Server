@@ -37,9 +37,6 @@ router.post('/data', function(req, res) {
     // Case where API key is verified and data can be saved in database
     else {
 
-
-
-
       // Create a new reading with passed data
       let newReading = new Reading({
         userEmail: device.userEmail,
