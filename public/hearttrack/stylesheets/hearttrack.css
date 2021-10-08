@@ -39,6 +39,13 @@
   margin-top: 50px;
 }
 
+.content{
+  min-height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+
+}
+
 .updateDeviceOption {
   margin-top: 20px;
   margin-bottom: 20px;
