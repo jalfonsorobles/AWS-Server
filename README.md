@@ -1,6 +1,6 @@
 # HeartTrack
 
-Link: [http://jesusalfonso.com:3000/hearttrack/](http://jesusalfonso.com:3000/hearttrack/)
+Link: [http://jesusalfonso.com/hearttrack/](http://jesusalfonso.com/hearttrack/)
 
 The sign in credentials of the shown account are:  
 
